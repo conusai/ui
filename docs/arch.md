@@ -20,7 +20,8 @@
 12. [Data Flow & State Management](#data-flow--state-management)
 13. [Responsive Strategy](#responsive-strategy)
 14. [Design Tokens & Color System](#design-tokens--color-system)
-15. [Dev Tooling](#dev-tooling)
+15. [Screenshot Export System](#screenshot-export-system)
+16. [Dev Tooling](#dev-tooling)
 
 ---
 
@@ -37,6 +38,8 @@
 | Theme          | Custom `ThemeProvider` (class strategy, localStorage) |
 | Documentation  | Fumadocs (fumadocs-core + fumadocs-ui + fumadocs-mdx) |
 | PWA            | `next-pwa` (service worker, manifest)               |
+| AI Vision      | Gemini 2.5 Flash (`@google/generative-ai`) — agentic UI exploration |
+| Screenshots    | Playwright (headless Chromium) + adm-zip             |
 | Linting        | Biome 2.4 (formatter + linter) + ESLint (Next.js)   |
 | Package Manager| Bun                                                 |
 | Language       | TypeScript 5 (strict mode)                          |
@@ -54,6 +57,12 @@ conusai-ui/
 │   │   ├── manifest.ts               # PWA Web App Manifest (programmatic)
 │   │   ├── page.tsx                  # Root redirect → /docs
 │   │   ├── api/
+│   │   │   ├── export/
+│   │   │   │   ├── route.ts           # Static screenshot export (GET → zip of 3 viewport PNGs)
+│   │   │   │   └── types.ts           # ViewportConfig type + VIEWPORTS array
+│   │   │   ├── screenshots/
+│   │   │   │   └── intelligent/
+│   │   │   │       └── route.ts       # AI-powered screenshot explorer (GET → zip)
 │   │   │   └── search/route.ts       # Fumadocs full-text search endpoint (GET)
 │   │   ├── demo/
 │   │   │   └── todolist/page.tsx     # TodoList demo page (RSC shell)
@@ -80,6 +89,12 @@ conusai-ui/
 │   │   │   │   ├── motion-variants.ts
 │   │   │   │   └── index.ts
 │   │   │   ├── right-sidebar/
+│   │   │   ├── screenshot-generator/
+│   │   │   │   ├── gemini-prompts.ts  # System prompt for AI explorer agent
+│   │   │   │   ├── intelligent-button.tsx  # Client button component (AI export trigger)
+│   │   │   │   ├── screenshot-config.ts   # Project seed routes registry
+│   │   │   │   ├── types.ts           # GeminiAction, GeminiExplorerResponse, ScreenshotEntry
+│   │   │   │   └── index.ts           # Barrel exports
 │   │   │   └── index.ts              # Barrel export for all library components
 │   │   └── ui/                       # shadcn/ui primitives (auto-generated)
 │   │       ├── avatar.tsx
@@ -115,6 +130,8 @@ conusai-ui/
 │   │
 │   ├── lib/
 │   │   ├── utils.ts                  # cn() — clsx + tailwind-merge utility
+│   │   ├── gemini-client.ts          # Reusable Gemini 2.5 Flash model instance
+│   │   ├── screenshot-utils.ts       # Viewport presets (mobile/tablet/desktop dimensions)
 │   │   └── docs/
 │   │       └── source.ts             # Fumadocs loader (connects generated .source → app routes)
 │   │
@@ -176,6 +193,7 @@ const withMDX = createMDX();
 const nextConfig: NextConfig = {
   reactCompiler: true,   // Enables the React Compiler (automatic memoization)
   turbopack: {},          // Required by Next 16 for build checks
+  serverExternalPackages: ["playwright", "adm-zip"],  // Keep native modules out of webpack bundling
 };
 
 export default withMDX(
@@ -503,6 +521,8 @@ All animations use **Framer Motion** with a consistent approach:
 /docs/getting-started      → Getting started guide
 /docs/components/*         → Component-level documentation pages
 /demo/todolist             → TodoListDemoPage (RSC) → <TodoDemo /> (client)
+/api/export                → Static screenshot export (3 viewport PNGs → zip)
+/api/screenshots/intelligent?project=<key>  → AI-powered screenshot explorer (Gemini + Playwright → zip)
 /api/search                → Fumadocs full-text search endpoint (GET)
 ```
 
@@ -511,6 +531,8 @@ All animations use **Framer Motion** with a consistent approach:
 - **Docs layout** (`src/app/docs/layout.tsx`): Wraps docs pages in Fumadocs `RootProvider` + `DocsLayout` with nav tree, search, and links to the demo
 - **Docs page** (`src/app/docs/[[...slug]]/page.tsx`): Catch-all renderer using `source.getPage(slug)` to resolve MDX content, generates static params via `source.generateParams()`
 - **Demo page** (`src/app/demo/todolist/page.tsx`): Server component shell with metadata, renders the client-only `<TodoListDemo />`
+- **Static export route** (`src/app/api/export/route.ts`): Launches headless Chromium, navigates to the demo page, clicks each preview mode button (`data-preview-mode`), and screenshots the `[data-screenshot="preview-frame"]` element at 2× device scale. Returns a zip with `conusai-mobile.png`, `conusai-tablet.png`, `conusai-desktop.png`. Config: `maxDuration = 120`, `dynamic = "force-dynamic"`
+- **AI screenshot route** (`src/app/api/screenshots/intelligent/route.ts`): Agentic exploration loop — Gemini 2.5 Flash receives a live screenshot, decides which UI actions to perform, Playwright executes them, then captures the new state. Repeats across all viewports until Gemini signals `done` or `MAX_STEPS` (25) is reached. Returns a zip of all discovered screens. Config: `maxDuration = 300`, `dynamic = "force-dynamic"`
 - **Search route** (`src/app/api/search/route.ts`): GET handler created via `createFromSource(source)` for Fumadocs full-text search
 
 The RSC → Client boundary is clean: only `TodoListDemo` and its children are client components. Layout and page shells remain server components.
