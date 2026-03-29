@@ -3,20 +3,21 @@ import type { NextRequest } from "next/server";
 import type { Browser, Page } from "playwright";
 import { chromium } from "playwright";
 
-import { EXPLORER_SYSTEM_PROMPT } from "@/components/conusai-ui/screenshot-generator/gemini-prompts";
-import {
-  type ProjectKey,
-  screenshotProjects,
-} from "@/components/conusai-ui/screenshot-generator/screenshot-config";
-import type { GeminiExplorerResponse } from "@/components/conusai-ui/screenshot-generator/types";
 import { explorerModel } from "@/lib/gemini-client";
 import { viewports } from "@/lib/screenshot-utils";
+import type { GeminiExplorerResponse } from "@/tools/screenshot-generator";
+import {
+  EXPLORER_SYSTEM_PROMPT,
+  type ProjectKey,
+  screenshotProjects,
+} from "@/tools/screenshot-generator";
 
 export const maxDuration = 300;
 export const dynamic = "force-dynamic";
 
 const SETTLE_MS = 1200;
 const MAX_STEPS = 25;
+const MAX_PROMPT_LENGTH = 1000;
 
 function sanitize(label: string): string {
   return label
@@ -79,7 +80,8 @@ async function exploreViewport(
   page: Page,
   projectKey: string,
   vpKey: string,
-  zip: AdmZip
+  zip: AdmZip,
+  userPrompt: string
 ): Promise<number> {
   let step = 0;
   let staleSteps = 0;
@@ -113,6 +115,10 @@ async function exploreViewport(
         ? `Actions already tried (DO NOT repeat these):\n${actionHistory.map((a, i) => `  ${i + 1}. ${a}`).join("\n")}`
         : "";
 
+    const goalSummary = userPrompt
+      ? `User-defined exploration goal (highest priority): ${userPrompt}`
+      : "";
+
     const result = await explorerModel.generateContent({
       contents: [
         {
@@ -126,7 +132,7 @@ async function exploreViewport(
               },
             },
             {
-              text: `Current URL: ${page.url()}\nViewport: ${vpKey} (${page.viewportSize()?.width}x${page.viewportSize()?.height})\n${previousStates}\n${triedSummary}\n\nWhat NEW action should I do next to discover a screen I haven't captured yet? If nothing new remains, set "done": true. Respond with ONLY valid JSON.`,
+              text: `Current URL: ${page.url()}\nViewport: ${vpKey} (${page.viewportSize()?.width}x${page.viewportSize()?.height})\n${goalSummary}\n${previousStates}\n${triedSummary}\n\nWhat NEW action should I do next to discover a screen I haven't captured yet while honoring the user-defined exploration goal? If nothing new remains, set "done": true. Respond with ONLY valid JSON.`,
             },
           ],
         },
@@ -226,6 +232,12 @@ async function exploreViewport(
 
 export async function GET(request: NextRequest) {
   const projectKey = request.nextUrl.searchParams.get("project") as ProjectKey;
+  const userPrompt =
+    request.nextUrl.searchParams
+      .get("prompt")
+      ?.trim()
+      .slice(0, MAX_PROMPT_LENGTH) ?? "";
+
   if (!projectKey || !screenshotProjects[projectKey]) {
     return new Response(
       JSON.stringify({ error: "Missing or invalid project parameter" }),
@@ -257,7 +269,13 @@ export async function GET(request: NextRequest) {
         // Wait for the app to be ready
         await page.waitForTimeout(SETTLE_MS);
 
-        const totalSteps = await exploreViewport(page, projectKey, vpKey, zip);
+        const totalSteps = await exploreViewport(
+          page,
+          projectKey,
+          vpKey,
+          zip,
+          userPrompt
+        );
         console.log(
           `[AI Explorer] ${vpKey} exploration complete: ${totalSteps} steps`
         );

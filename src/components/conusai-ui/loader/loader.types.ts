@@ -1,4 +1,6 @@
-export type LoaderProps = {
+import type { ComponentPropsWithoutRef } from "react";
+
+export type LoaderProps = ComponentPropsWithoutRef<"div"> & {
   visible: boolean;
-  className?: string;
+  tone?: "default" | "soft";
 };

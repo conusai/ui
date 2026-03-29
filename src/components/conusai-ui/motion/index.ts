@@ -1,4 +1,5 @@
 export {
+  cnMotionProps,
   createFadeUpVariants,
   createLoaderVariants,
   createPanelVariants,

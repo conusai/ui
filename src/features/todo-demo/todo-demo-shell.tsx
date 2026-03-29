@@ -2,11 +2,10 @@
 
 import { Download, Loader2, Sparkles } from "lucide-react";
 import { useState } from "react";
-
-import { IntelligentScreenshotButton } from "@/components/conusai-ui/screenshot-generator/intelligent-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { AIExportButton } from "@/tools/screenshot-generator";
 
 import { previewModes } from "./todo-demo.constants";
 import type { TodoDemoController } from "./todo-demo.types";
@@ -143,7 +142,7 @@ export function TodoDemoShell({ demo }: TodoDemoShellProps) {
             {exporting ? "Generating…" : "Export All Screenshots"}
           </Button>
 
-          <IntelligentScreenshotButton project="todolist" />
+          <AIExportButton project="todolist" />
         </div>
 
         <TodoPreviewWorkspace demo={demo} />

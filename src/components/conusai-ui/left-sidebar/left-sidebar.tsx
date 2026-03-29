@@ -1,9 +1,12 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
+import * as React from "react";
 
 import {
+  cnMotionProps,
   createFadeUpVariants,
   createSidebarVariants,
   createTapMotion,
@@ -31,6 +34,18 @@ function SidebarContent({
   fadeUpVariants: ReturnType<typeof createFadeUpVariants>;
   tapMotion: ReturnType<typeof createTapMotion>;
 }) {
+  const navItemVariants = cva(
+    "touch-target rounded-[1.35rem] border px-4 py-3 text-left transition-colors",
+    {
+      variants: {
+        active: {
+          true: "border-primary bg-primary text-primary-foreground",
+          false: "border-border/60 bg-background/80 hover:bg-muted",
+        },
+      },
+    }
+  );
+
   return (
     <>
       <div className="mb-5 flex items-center justify-between">
@@ -60,14 +75,9 @@ function SidebarContent({
             variants={fadeUpVariants}
             initial="hidden"
             animate="visible"
-            {...tapMotion}
+            {...cnMotionProps(tapMotion)}
             onClick={() => onSelect(item.id)}
-            className={cn(
-              "touch-target rounded-[1.35rem] border px-4 py-3 text-left transition-colors",
-              item.id === activeItem
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-border/60 bg-background/80 hover:bg-muted"
-            )}
+            className={cn(navItemVariants({ active: item.id === activeItem }))}
           >
             <div className="flex items-center justify-between gap-3">
               <span className="flex items-center gap-3">
@@ -94,76 +104,101 @@ function SidebarContent({
   );
 }
 
-export function LeftSidebar({
-  open,
-  items,
-  activeItem,
-  onClose,
-  onSelect,
-  variant = "overlay",
-  className,
-}: LeftSidebarProps) {
-  const shouldReduceMotion = useReducedMotionPreference();
-  const fadeUpVariants = createFadeUpVariants(shouldReduceMotion);
-  const sidebarVariants = createSidebarVariants(shouldReduceMotion);
-  const tapMotion = createTapMotion(shouldReduceMotion);
+const leftSidebarVariants = cva("flex flex-col backdrop-blur-2xl", {
+  variants: {
+    variant: {
+      inline:
+        "h-full w-64 shrink-0 border-r border-border/70 bg-sidebar/90 px-4 pb-4 pt-5",
+      overlay:
+        "absolute inset-y-0 left-0 z-30 w-[78%] max-w-[280px] border-r border-border/70 bg-sidebar/95 px-4 pb-4 pt-5",
+    },
+  },
+  defaultVariants: {
+    variant: "overlay",
+  },
+});
 
-  if (variant === "inline") {
+const LeftSidebar = React.forwardRef<HTMLElement, LeftSidebarProps>(
+  (
+    {
+      open,
+      items,
+      activeItem,
+      onClose,
+      onSelect,
+      variant = "overlay",
+      className,
+      ...props
+    },
+    ref
+  ) => {
+    const shouldReduceMotion = useReducedMotionPreference();
+    const fadeUpVariants = createFadeUpVariants(shouldReduceMotion);
+    const sidebarMotionVariants = createSidebarVariants(shouldReduceMotion);
+    const tapMotion = createTapMotion(shouldReduceMotion);
+
+    if (variant === "inline") {
+      return (
+        <aside
+          ref={ref}
+          data-slot="conus-left-sidebar"
+          data-variant={variant}
+          className={cn(leftSidebarVariants({ variant }), className)}
+          {...props}
+        >
+          <SidebarContent
+            items={items}
+            activeItem={activeItem}
+            onClose={onClose}
+            onSelect={onSelect}
+            showCloseButton={false}
+            fadeUpVariants={fadeUpVariants}
+            tapMotion={tapMotion}
+          />
+        </aside>
+      );
+    }
+
     return (
-      <aside
-        className={cn(
-          "flex h-full w-64 shrink-0 flex-col border-r border-border/70 bg-sidebar/90 px-4 pb-4 pt-5 backdrop-blur-2xl",
-          className
-        )}
-      >
-        <SidebarContent
-          items={items}
-          activeItem={activeItem}
-          onClose={onClose}
-          onSelect={onSelect}
-          showCloseButton={false}
-          fadeUpVariants={fadeUpVariants}
-          tapMotion={tapMotion}
-        />
-      </aside>
+      <AnimatePresence>
+        {open ? (
+          <>
+            <motion.button
+              type="button"
+              aria-label="Close navigation"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onClose}
+              className="absolute inset-0 z-20 bg-[rgba(9,17,31,0.24)] backdrop-blur-[2px]"
+            />
+            <motion.aside
+              ref={ref}
+              initial="closed"
+              animate="open"
+              exit="closed"
+              variants={sidebarMotionVariants}
+              data-slot="conus-left-sidebar"
+              data-variant={variant}
+              className={cn(leftSidebarVariants({ variant }), className)}
+            >
+              <SidebarContent
+                items={items}
+                activeItem={activeItem}
+                onClose={onClose}
+                onSelect={onSelect}
+                showCloseButton
+                fadeUpVariants={fadeUpVariants}
+                tapMotion={tapMotion}
+              />
+            </motion.aside>
+          </>
+        ) : null}
+      </AnimatePresence>
     );
   }
+);
 
-  return (
-    <AnimatePresence>
-      {open ? (
-        <>
-          <motion.button
-            type="button"
-            aria-label="Close navigation"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="absolute inset-0 z-20 bg-[rgba(9,17,31,0.24)] backdrop-blur-[2px]"
-          />
-          <motion.aside
-            initial="closed"
-            animate="open"
-            exit="closed"
-            variants={sidebarVariants}
-            className={cn(
-              "absolute inset-y-0 left-0 z-30 flex w-[78%] max-w-[280px] flex-col border-r border-border/70 bg-sidebar/95 px-4 pb-4 pt-5 backdrop-blur-2xl",
-              className
-            )}
-          >
-            <SidebarContent
-              items={items}
-              activeItem={activeItem}
-              onClose={onClose}
-              onSelect={onSelect}
-              showCloseButton
-              fadeUpVariants={fadeUpVariants}
-              tapMotion={tapMotion}
-            />
-          </motion.aside>
-        </>
-      ) : null}
-    </AnimatePresence>
-  );
-}
+LeftSidebar.displayName = "LeftSidebar";
+
+export { LeftSidebar };

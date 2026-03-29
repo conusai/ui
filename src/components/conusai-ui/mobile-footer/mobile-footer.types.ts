@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import type { ComponentPropsWithoutRef } from "react";
 
 export type FooterTab = {
   id: string;
@@ -6,9 +7,12 @@ export type FooterTab = {
   icon: LucideIcon;
 };
 
-export type MobileFooterProps = {
+export type MobileFooterProps = Omit<
+  ComponentPropsWithoutRef<"nav">,
+  "onChange"
+> & {
   items: FooterTab[];
   activeItem: string;
   onChange: (id: string) => void;
-  className?: string;
+  surface?: "floating" | "flush";
 };

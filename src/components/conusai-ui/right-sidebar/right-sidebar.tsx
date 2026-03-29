@@ -1,7 +1,9 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Trash2 } from "lucide-react";
+import * as React from "react";
 
 import { createPanelVariants } from "@/components/conusai-ui/motion";
 import { Button } from "@/components/ui/button";
@@ -25,6 +27,18 @@ function SidebarPanel({
   onDelete: () => void;
   inline: boolean;
 }) {
+  const priorityVariants = cva(
+    "touch-target rounded-2xl border px-3 py-2 text-sm font-medium",
+    {
+      variants: {
+        active: {
+          true: "border-primary bg-primary text-primary-foreground",
+          false: "border-border bg-background hover:bg-muted",
+        },
+      },
+    }
+  );
+
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between gap-3">
@@ -92,10 +106,7 @@ function SidebarPanel({
                     type="button"
                     onClick={() => onChange({ priority })}
                     className={cn(
-                      "touch-target rounded-2xl border px-3 py-2 text-sm font-medium",
-                      todo.priority === priority
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border bg-background hover:bg-muted"
+                      priorityVariants({ active: todo.priority === priority })
                     )}
                   >
                     {priority}
@@ -121,80 +132,94 @@ function SidebarPanel({
   );
 }
 
-export function RightSidebar({
-  open,
-  todo,
-  onClose,
-  onChange,
-  onDelete,
-  variant = "overlay",
-  className,
-}: RightSidebarProps) {
-  const shouldReduceMotion = useReducedMotionPreference();
-  const panelVariants = createPanelVariants(shouldReduceMotion);
+const rightSidebarVariants = cva("flex flex-col border-l backdrop-blur-2xl", {
+  variants: {
+    variant: {
+      inline: "h-full w-[320px] shrink-0 border-border/70 bg-card/88 p-4",
+      overlay:
+        "absolute inset-y-0 right-0 z-30 w-[88%] border-border/70 bg-card/96 p-4",
+    },
+  },
+  defaultVariants: {
+    variant: "overlay",
+  },
+});
 
-  if (variant === "inline") {
-    if (!open || !todo) {
-      return null;
-    }
+const RightSidebar = React.forwardRef<HTMLElement, RightSidebarProps>(
+  (
+    { open, todo, onClose, onChange, onDelete, variant = "overlay", className },
+    ref
+  ) => {
+    const shouldReduceMotion = useReducedMotionPreference();
+    const panelVariants = createPanelVariants(shouldReduceMotion);
 
-    return (
-      <AnimatePresence initial={false}>
-        <motion.aside
-          initial="closed"
-          animate="open"
-          exit="closed"
-          variants={panelVariants}
-          className={cn(
-            "flex h-full w-[320px] shrink-0 flex-col border-l border-border/70 bg-card/88 p-4 backdrop-blur-2xl",
-            className
-          )}
-        >
-          <SidebarPanel
-            todo={todo}
-            onClose={onClose}
-            onChange={onChange}
-            onDelete={onDelete}
-            inline
-          />
-        </motion.aside>
-      </AnimatePresence>
-    );
-  }
+    if (variant === "inline") {
+      if (!open || !todo) {
+        return null;
+      }
 
-  return (
-    <AnimatePresence>
-      {open && todo ? (
-        <>
-          <motion.button
-            type="button"
-            aria-label="Close task inspector"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="absolute inset-0 z-20 bg-[rgba(9,17,31,0.2)] backdrop-blur-[2px]"
-          />
+      return (
+        <AnimatePresence initial={false}>
           <motion.aside
+            ref={ref}
             initial="closed"
             animate="open"
             exit="closed"
             variants={panelVariants}
-            className={cn(
-              "absolute inset-y-0 right-0 z-30 w-[88%] border-l border-border/70 bg-card/96 p-4 backdrop-blur-2xl",
-              className
-            )}
+            data-slot="conus-right-sidebar"
+            data-variant={variant}
+            className={cn(rightSidebarVariants({ variant }), className)}
           >
             <SidebarPanel
               todo={todo}
               onClose={onClose}
               onChange={onChange}
               onDelete={onDelete}
-              inline={false}
+              inline
             />
           </motion.aside>
-        </>
-      ) : null}
-    </AnimatePresence>
-  );
-}
+        </AnimatePresence>
+      );
+    }
+
+    return (
+      <AnimatePresence>
+        {open && todo ? (
+          <>
+            <motion.button
+              type="button"
+              aria-label="Close task inspector"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onClose}
+              className="absolute inset-0 z-20 bg-[rgba(9,17,31,0.2)] backdrop-blur-[2px]"
+            />
+            <motion.aside
+              ref={ref}
+              initial="closed"
+              animate="open"
+              exit="closed"
+              variants={panelVariants}
+              data-slot="conus-right-sidebar"
+              data-variant={variant}
+              className={cn(rightSidebarVariants({ variant }), className)}
+            >
+              <SidebarPanel
+                todo={todo}
+                onClose={onClose}
+                onChange={onChange}
+                onDelete={onDelete}
+                inline={false}
+              />
+            </motion.aside>
+          </>
+        ) : null}
+      </AnimatePresence>
+    );
+  }
+);
+
+RightSidebar.displayName = "RightSidebar";
+
+export { RightSidebar };

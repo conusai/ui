@@ -1,6 +1,8 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import { Menu, MoonStar, SunMedium } from "lucide-react";
+import * as React from "react";
 
 import { LanguagePicker } from "@/components/conusai-ui/language-picker";
 import { useTheme } from "@/components/theme-provider";
@@ -10,68 +12,99 @@ import { cn } from "@/lib/utils";
 
 import type { HeaderProps } from "./header.types";
 
-export function Header({
-  title,
-  subtitle,
-  language,
-  languages,
-  onLanguageChange,
-  onMenuClick,
-  showMenuButton = true,
-  languagePresentation = "auto",
-  className,
-}: HeaderProps) {
-  const { resolvedTheme, setTheme } = useTheme();
+const headerVariants = cva(
+  "safe-pt flex items-center justify-between gap-3 border-b px-4 py-3 backdrop-blur-xl",
+  {
+    variants: {
+      surface: {
+        default: "border-border/60 bg-background/70",
+        elevated:
+          "border-border/70 bg-card/85 shadow-[0_18px_40px_-28px_rgba(10,16,31,0.55)]",
+      },
+    },
+    defaultVariants: {
+      surface: "default",
+    },
+  }
+);
 
-  return (
-    <header
-      className={cn(
-        "safe-pt flex items-center justify-between gap-3 border-b border-border/60 bg-background/70 px-4 py-3 backdrop-blur-xl",
-        className
-      )}
-    >
-      <div className="flex min-w-0 items-center gap-3">
-        {showMenuButton ? (
+const Header = React.forwardRef<HTMLElement, HeaderProps>(
+  (
+    {
+      title,
+      subtitle,
+      language,
+      languages,
+      onLanguageChange,
+      onMenuClick,
+      showMenuButton = true,
+      languagePresentation = "auto",
+      surface = "default",
+      className,
+      ...props
+    },
+    ref
+  ) => {
+    const { resolvedTheme, setTheme } = useTheme();
+
+    return (
+      <header
+        ref={ref}
+        data-slot="conus-header"
+        data-surface={surface}
+        className={cn(headerVariants({ surface }), className)}
+        {...props}
+      >
+        <div className="flex min-w-0 items-center gap-3">
+          {showMenuButton ? (
+            <Button
+              variant="outline"
+              size="icon-sm"
+              className="touch-target border-border/70 bg-background/80"
+              onClick={onMenuClick}
+              aria-label="Open navigation"
+            >
+              <Menu />
+            </Button>
+          ) : null}
+          <div className="min-w-0">
+            <p className="truncate font-heading text-[0.95rem] uppercase tracking-[0.18em] text-muted-foreground">
+              {subtitle}
+            </p>
+            <h1 className="truncate text-base font-semibold">{title}</h1>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <LanguagePicker
+            options={languages}
+            value={language}
+            onChange={onLanguageChange}
+            presentation={languagePresentation}
+            triggerVariant="outline"
+          />
           <Button
             variant="outline"
             size="icon-sm"
             className="touch-target border-border/70 bg-background/80"
-            onClick={onMenuClick}
-            aria-label="Open navigation"
+            onClick={() =>
+              setTheme(resolvedTheme === "dark" ? "light" : "dark")
+            }
+            aria-label="Toggle theme"
           >
-            <Menu />
+            {resolvedTheme === "dark" ? <SunMedium /> : <MoonStar />}
           </Button>
-        ) : null}
-        <div className="min-w-0">
-          <p className="truncate font-heading text-[0.95rem] uppercase tracking-[0.18em] text-muted-foreground">
-            {subtitle}
-          </p>
-          <h1 className="truncate text-base font-semibold">{title}</h1>
+          <Avatar className="ring-1 ring-border/60">
+            <AvatarFallback className="bg-[linear-gradient(135deg,rgba(110,204,255,0.32),rgba(255,211,126,0.38))] text-foreground">
+              CA
+            </AvatarFallback>
+          </Avatar>
         </div>
-      </div>
+      </header>
+    );
+  }
+);
 
-      <div className="flex items-center gap-2">
-        <LanguagePicker
-          options={languages}
-          value={language}
-          onChange={onLanguageChange}
-          presentation={languagePresentation}
-        />
-        <Button
-          variant="outline"
-          size="icon-sm"
-          className="touch-target border-border/70 bg-background/80"
-          onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-          aria-label="Toggle theme"
-        >
-          {resolvedTheme === "dark" ? <SunMedium /> : <MoonStar />}
-        </Button>
-        <Avatar className="ring-1 ring-border/60">
-          <AvatarFallback className="bg-[linear-gradient(135deg,rgba(110,204,255,0.32),rgba(255,211,126,0.38))] text-foreground">
-            CA
-          </AvatarFallback>
-        </Avatar>
-      </div>
-    </header>
-  );
-}
+Header.displayName = "Header";
+
+export { Header };

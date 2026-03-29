@@ -109,3 +109,19 @@ export function createTapMotion(
     whileHover: { y: -1 },
   };
 }
+
+export function cnMotionProps<T extends MotionProps>(
+  ...propsList: Array<Partial<T> | undefined>
+): Partial<T> {
+  const merged: Partial<T> = {};
+
+  for (const props of propsList) {
+    if (!props) {
+      continue;
+    }
+
+    Object.assign(merged, props);
+  }
+
+  return merged;
+}

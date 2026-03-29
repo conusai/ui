@@ -1,3 +1,4 @@
+export { ThemeProvider, useTheme } from "../theme-provider";
 export type { HeaderProps } from "./header";
 export { Header } from "./header";
 export type {

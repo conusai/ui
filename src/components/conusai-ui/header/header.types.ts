@@ -1,9 +1,11 @@
+import type { ComponentPropsWithoutRef } from "react";
+
 import type {
   LanguageOption,
   LanguagePickerPresentation,
 } from "../language-picker/language-picker.types";
 
-export type HeaderProps = {
+export type HeaderProps = Omit<ComponentPropsWithoutRef<"header">, "title"> & {
   title: string;
   subtitle: string;
   language: string;
@@ -12,5 +14,5 @@ export type HeaderProps = {
   onMenuClick: () => void;
   showMenuButton?: boolean;
   languagePresentation?: LanguagePickerPresentation;
-  className?: string;
+  surface?: "default" | "elevated";
 };

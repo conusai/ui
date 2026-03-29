@@ -1,9 +1,8 @@
-import type { ReactNode } from "react";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
 export type PreviewMode = "mobile" | "tablet" | "desktop";
 
-export type MobilePreviewFrameProps = {
+export type MobilePreviewFrameProps = ComponentPropsWithoutRef<"div"> & {
   children: ReactNode;
-  className?: string;
   mode?: PreviewMode;
 };

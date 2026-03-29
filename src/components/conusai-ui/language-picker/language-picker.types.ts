@@ -1,3 +1,5 @@
+import type { ComponentPropsWithoutRef } from "react";
+
 export type LanguageOption = {
   value: string;
   label: string;
@@ -6,10 +8,14 @@ export type LanguageOption = {
 
 export type LanguagePickerPresentation = "auto" | "sheet" | "dropdown";
 
-export type LanguagePickerProps = {
+export type LanguagePickerProps = Omit<
+  ComponentPropsWithoutRef<"button">,
+  "onChange"
+> & {
   options: LanguageOption[];
   value: string;
   onChange: (value: string) => void;
   presentation?: LanguagePickerPresentation;
-  className?: string;
+  triggerVariant?: "outline" | "ghost";
+  ariaLabel?: string;
 };
