@@ -7,6 +7,7 @@ const withMDX = createMDX();
 const nextConfig: NextConfig = {
   reactCompiler: true,
   turbopack: {},
+  serverExternalPackages: ["playwright"],
 };
 
 export default withMDX(

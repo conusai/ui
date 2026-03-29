@@ -1,7 +1,9 @@
 "use client";
 
-import { Sparkles } from "lucide-react";
+import { Download, Loader2, Sparkles } from "lucide-react";
+import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +16,27 @@ type TodoDemoShellProps = {
 };
 
 export function TodoDemoShell({ demo }: TodoDemoShellProps) {
+  const [exporting, setExporting] = useState(false);
+
+  async function handleExportScreenshots() {
+    setExporting(true);
+    try {
+      const res = await fetch("/api/export");
+      if (!res.ok) {
+        throw new Error(`Export failed: ${res.status}`);
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "conusai-screenshots.zip";
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setExporting(false);
+    }
+  }
+
   return (
     <section className="relative overflow-hidden px-4 py-8 sm:px-6 lg:px-10">
       <div
@@ -51,6 +74,7 @@ export function TodoDemoShell({ demo }: TodoDemoShellProps) {
               <button
                 key={mode.id}
                 type="button"
+                data-preview-mode={mode.id}
                 onClick={() => demo.setPreviewMode(mode.id)}
                 className={cn(
                   "touch-target rounded-[1.35rem] border px-4 py-3 text-left transition-colors",
@@ -102,6 +126,21 @@ export function TodoDemoShell({ demo }: TodoDemoShellProps) {
               </CardContent>
             </Card>
           </div>
+
+          <Button
+            variant="outline"
+            size="lg"
+            disabled={exporting}
+            onClick={handleExportScreenshots}
+            className="w-full sm:w-auto"
+          >
+            {exporting ? (
+              <Loader2 className="animate-spin" data-icon="inline-start" />
+            ) : (
+              <Download data-icon="inline-start" />
+            )}
+            {exporting ? "Generating…" : "Export All Screenshots"}
+          </Button>
         </div>
 
         <TodoPreviewWorkspace demo={demo} />
