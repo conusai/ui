@@ -1,0 +1,27 @@
+---
+title: Mobile Footer
+description: Thumb-zone navigation bar for compact app experiences.
+---
+
+import { MobileFooterPreview } from "@/components/docs/component-previews";
+
+# Mobile Footer
+
+`MobileFooter` is the bottom navigation primitive for compact views where primary actions need to stay reachable during scroll.
+
+<MobileFooterPreview />
+
+## Notes
+
+- Best suited for 3 to 5 top-level destinations.
+- Animation is reduced automatically when reduced-motion is enabled.
+- The parent surface should reserve enough bottom spacing for safe-area insets.
+
+## Public props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `items` | `FooterTab[]` | Navigation items with labels and icons |
+| `activeItem` | `string` | Selected item identifier |
+| `onChange` | `(id: string) => void` | Called when an item is selected |
+| `className` | `string` | Optional style override hook |

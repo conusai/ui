@@ -4,7 +4,8 @@ ConusAI UI is a Next 16 demo workspace for a mobile-first component library buil
 
 ## Routes
 
-- `/` redirects to `/demo/todolist`
+- `/` redirects to `/docs`
+- `/docs` renders the in-app Fumadocs documentation site
 - `/demo/todolist` renders the TodoList showcase page inside a mobile preview frame
 
 ## Stack
@@ -25,6 +26,8 @@ bun run dev
 ```
 
 Open `http://localhost:3000/demo/todolist`.
+
+Open `http://localhost:3000/docs` for the documentation site.
 
 ## Build Checks
 

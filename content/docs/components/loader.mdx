@@ -1,0 +1,25 @@
+---
+title: Loader
+description: Full-surface branded loading overlay with motion-aware transitions.
+---
+
+import { LoaderPreview } from "@/components/docs/component-previews";
+
+# Loader
+
+`Loader` is a focused branded overlay for async transitions where the component library should still carry the visual language.
+
+<LoaderPreview />
+
+## Notes
+
+- Designed as an absolute overlay over an already-sized container.
+- Animation is disabled when reduced motion is preferred.
+- Works well for route transitions, panel hydration, or demo boot states.
+
+## Public props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `visible` | `boolean` | Controls whether the overlay is rendered |
+| `className` | `string` | Optional style override hook |

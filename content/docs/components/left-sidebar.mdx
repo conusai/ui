@@ -1,0 +1,30 @@
+---
+title: Left Sidebar
+description: Navigation sidebar for workspace-level switching across overlay and inline layouts.
+---
+
+import { LeftSidebarPreview } from "@/components/docs/component-previews";
+
+# Left Sidebar
+
+`LeftSidebar` handles the primary app navigation and adapts cleanly between mobile overlay mode and persistent desktop mode.
+
+<LeftSidebarPreview />
+
+## Notes
+
+- `variant="overlay"` is designed for constrained canvases.
+- `variant="inline"` keeps the same internal content and motion language with a desktop shell.
+- Navigation items support metadata and optional Lucide icons.
+
+## Public props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `open` | `boolean` | Controls overlay visibility |
+| `items` | `NavItem[]` | Navigation entries |
+| `activeItem` | `string` | Selected item identifier |
+| `onClose` | `() => void` | Called when the overlay should dismiss |
+| `onSelect` | `(id: string) => void` | Called when a nav item is selected |
+| `variant` | `"overlay" | "inline"` | Chooses mobile or desktop presentation |
+| `className` | `string` | Optional style override hook |

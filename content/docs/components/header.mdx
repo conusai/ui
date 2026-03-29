@@ -1,0 +1,32 @@
+---
+title: Header
+description: Top navigation bar with title, locale switching, theme control, and a mobile menu trigger.
+---
+
+import { HeaderPreview } from "@/components/docs/component-previews";
+
+# Header
+
+Use `Header` as the main top bar in mobile and compact workspace surfaces.
+
+<HeaderPreview />
+
+## Notes
+
+- The component is client-side because it relies on theme and device-adaptive interactions.
+- Locale selection can switch between dropdown and sheet presentation.
+- The menu trigger is optional for layouts that already pin navigation.
+
+## Public props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `title` | `string` | Main page title |
+| `subtitle` | `string` | Eyebrow label rendered above the title |
+| `language` | `string` | Current locale value |
+| `languages` | `LanguageOption[]` | Available locale options |
+| `onLanguageChange` | `(value: string) => void` | Locale change handler |
+| `onMenuClick` | `() => void` | Called when the menu button is pressed |
+| `showMenuButton` | `boolean` | Hides the leading menu affordance when false |
+| `languagePresentation` | `"auto" | "sheet" | "dropdown"` | Forces locale picker presentation |
+| `className` | `string` | Optional style override hook |

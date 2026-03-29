@@ -1,0 +1,26 @@
+---
+title: Mobile Preview Frame
+description: Device framing utility for presenting mobile, tablet, and desktop UI states in docs and demos.
+---
+
+import { MobilePreviewFramePreview } from "@/components/docs/component-previews";
+
+# Mobile Preview Frame
+
+`MobilePreviewFrame` wraps arbitrary content in a styled viewport shell. Use it when you need documentation previews that feel close to product shots instead of raw screenshots.
+
+<MobilePreviewFramePreview />
+
+## Notes
+
+- Supports three modes: `mobile`, `tablet`, and `desktop`.
+- Does not own the inner layout, only the outer shell.
+- Useful for docs pages, landing pages, and marketing-grade previews.
+
+## Public props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `children` | `ReactNode` | Content rendered inside the frame |
+| `mode` | `"mobile" | "tablet" | "desktop"` | Frame variant |
+| `className` | `string` | Optional wrapper class |

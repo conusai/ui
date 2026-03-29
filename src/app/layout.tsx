@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Manrope, Space_Grotesk } from "next/font/google";
+import { DevServiceWorkerReset } from "@/components/dev-service-worker-reset";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
@@ -55,6 +56,7 @@ export default function RootLayout({
       className={`${manrope.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >
       <body className="min-h-full font-sans text-foreground">
+        <DevServiceWorkerReset />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
