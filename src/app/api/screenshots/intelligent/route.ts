@@ -1,16 +1,16 @@
 import AdmZip from "adm-zip";
 import type { NextRequest } from "next/server";
-import type { Browser, Page } from "playwright";
+import type { Browser, Locator, Page } from "playwright";
 import { chromium } from "playwright";
 
 import { explorerModel } from "@/lib/gemini-client";
-import { viewports } from "@/lib/screenshot-utils";
 import type { GeminiExplorerResponse } from "@/tools/screenshot-generator";
 import {
   EXPLORER_SYSTEM_PROMPT,
   type ProjectKey,
   screenshotProjects,
 } from "@/tools/screenshot-generator";
+import { VIEWPORTS } from "@/app/api/export/types";
 
 export const maxDuration = 300;
 export const dynamic = "force-dynamic";
@@ -76,10 +76,11 @@ function actionSignature(
 
 const MAX_STALE_STEPS = 3;
 
-async function exploreViewport(
+async function explorePreviewMode(
   page: Page,
+  frame: Locator,
   projectKey: string,
-  vpKey: string,
+  modeKey: string,
   zip: AdmZip,
   userPrompt: string
 ): Promise<number> {
@@ -89,20 +90,17 @@ async function exploreViewport(
   const triedActions = new Set<string>();
   const actionHistory: string[] = [];
 
-  // Capture initial state
-  const initialPng = await page.screenshot({ fullPage: true, type: "png" });
+  // Capture initial state — frame only
+  const initialPng = await frame.screenshot({ type: "png" });
   zip.addFile(
-    `${projectKey}-${vpKey}-step0-initial.png`,
+    `${projectKey}-${modeKey}-step0-initial.png`,
     Buffer.from(initialPng)
   );
   step++;
 
   while (step < MAX_STEPS) {
-    // Take a screenshot of the current state for Gemini to analyse
-    const screenshotBuffer = await page.screenshot({
-      fullPage: true,
-      type: "png",
-    });
+    // Take a screenshot of the frame for Gemini to analyse
+    const screenshotBuffer = await frame.screenshot({ type: "png" });
     const base64Screenshot = Buffer.from(screenshotBuffer).toString("base64");
 
     const previousStates =
@@ -132,7 +130,7 @@ async function exploreViewport(
               },
             },
             {
-              text: `Current URL: ${page.url()}\nViewport: ${vpKey} (${page.viewportSize()?.width}x${page.viewportSize()?.height})\n${goalSummary}\n${previousStates}\n${triedSummary}\n\nWhat NEW action should I do next to discover a screen I haven't captured yet while honoring the user-defined exploration goal? If nothing new remains, set "done": true. Respond with ONLY valid JSON.`,
+              text: `Current URL: ${page.url()}\nPreview mode: ${modeKey}\n${goalSummary}\n${previousStates}\n${triedSummary}\n\nWhat NEW action should I do next to discover a screen I haven't captured yet while honoring the user-defined exploration goal? If nothing new remains, set "done": true. Respond with ONLY valid JSON.`,
             },
           ],
         },
@@ -159,7 +157,7 @@ async function exploreViewport(
 
     if (parsed.done) {
       console.log(
-        `[AI Explorer] Gemini says done for ${vpKey} after ${step} steps`
+        `[AI Explorer] Gemini says done for ${modeKey} after ${step} steps`
       );
       break;
     }
@@ -173,11 +171,11 @@ async function exploreViewport(
     if (allRepeats) {
       staleSteps++;
       console.warn(
-        `[AI Explorer] [${vpKey}] Step ${step}: all actions are repeats (stale ${staleSteps}/${MAX_STALE_STEPS})`
+        `[AI Explorer] [${modeKey}] Step ${step}: all actions are repeats (stale ${staleSteps}/${MAX_STALE_STEPS})`
       );
       if (staleSteps >= MAX_STALE_STEPS) {
         console.log(
-          `[AI Explorer] [${vpKey}] Aborting — ${MAX_STALE_STEPS} consecutive stale steps`
+          `[AI Explorer] [${modeKey}] Aborting — ${MAX_STALE_STEPS} consecutive stale steps`
         );
         break;
       }
@@ -195,30 +193,30 @@ async function exploreViewport(
         `${action.type}${action.selector ? ` on "${action.selector}"` : ""} — ${action.description}`
       );
       console.log(
-        `[AI Explorer] [${vpKey}] Step ${step}: ${action.type} — ${action.description}`
+        `[AI Explorer] [${modeKey}] Step ${step}: ${action.type} — ${action.description}`
       );
       await executeAction(page, action);
       await page.waitForTimeout(SETTLE_MS);
     }
 
-    // Capture screenshot of the new state
+    // Capture screenshot of the new state — frame only
     const label = sanitize(parsed.screenshotLabel || `step${step}`);
 
     if (!visitedLabels.has(label)) {
       visitedLabels.add(label);
-      const statePng = await page.screenshot({ fullPage: true, type: "png" });
-      const filename = `${projectKey}-${vpKey}-step${step}-${label}.png`;
+      const statePng = await frame.screenshot({ type: "png" });
+      const filename = `${projectKey}-${modeKey}-step${step}-${label}.png`;
       zip.addFile(filename, Buffer.from(statePng));
       console.log(`[AI Explorer] Saved: ${filename}`);
     } else {
       // Duplicate label — count as stale
       staleSteps++;
       console.warn(
-        `[AI Explorer] [${vpKey}] Step ${step}: duplicate label "${label}" (stale ${staleSteps}/${MAX_STALE_STEPS})`
+        `[AI Explorer] [${modeKey}] Step ${step}: duplicate label "${label}" (stale ${staleSteps}/${MAX_STALE_STEPS})`
       );
       if (staleSteps >= MAX_STALE_STEPS) {
         console.log(
-          `[AI Explorer] [${vpKey}] Aborting — ${MAX_STALE_STEPS} consecutive stale steps`
+          `[AI Explorer] [${modeKey}] Aborting — ${MAX_STALE_STEPS} consecutive stale steps`
         );
         break;
       }
@@ -254,34 +252,47 @@ export async function GET(request: NextRequest) {
     browser = await chromium.launch({ headless: true });
 
     for (const seedRoute of project.seedRoutes) {
-      for (const [vpKey, viewport] of Object.entries(viewports)) {
-        const context = await browser.newContext({
-          viewport: { width: viewport.width, height: viewport.height },
-          deviceScaleFactor: 2,
-        });
-        const page = await context.newPage();
+      // Use the largest viewport so all preview modes fit comfortably
+      const context = await browser.newContext({
+        viewport: { width: 1920, height: 1200 },
+        deviceScaleFactor: 2,
+      });
+      const page = await context.newPage();
 
-        await page.goto(`${baseUrl}${seedRoute}`, {
-          waitUntil: "networkidle",
-          timeout: 30000,
-        });
+      await page.goto(`${baseUrl}${seedRoute}`, {
+        waitUntil: "networkidle",
+        timeout: 30000,
+      });
 
-        // Wait for the app to be ready
+      // Wait for the loader to finish and frame to appear
+      await page.waitForSelector('[data-screenshot="preview-frame"]', {
+        state: "visible",
+        timeout: 15_000,
+      });
+      await page.waitForTimeout(SETTLE_MS);
+
+      for (const vp of VIEWPORTS) {
+        // Resize viewport and switch preview mode via button
+        await page.setViewportSize({ width: vp.width, height: vp.height });
+        await page.click(`button[data-preview-mode="${vp.id}"]`);
         await page.waitForTimeout(SETTLE_MS);
 
-        const totalSteps = await exploreViewport(
+        const frame = page.locator('[data-screenshot="preview-frame"]');
+
+        const totalSteps = await explorePreviewMode(
           page,
+          frame,
           projectKey,
-          vpKey,
+          vp.id,
           zip,
           userPrompt
         );
         console.log(
-          `[AI Explorer] ${vpKey} exploration complete: ${totalSteps} steps`
+          `[AI Explorer] ${vp.id} exploration complete: ${totalSteps} steps`
         );
-
-        await context.close();
       }
+
+      await context.close();
     }
 
     await browser.close();
