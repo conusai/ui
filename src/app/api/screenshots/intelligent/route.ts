@@ -67,6 +67,14 @@ async function executeAction(
   }
 }
 
+function actionSignature(
+  action: GeminiExplorerResponse["actions"][number]
+): string {
+  return `${action.type}::${action.selector || ""}::${action.description}`;
+}
+
+const MAX_STALE_STEPS = 3;
+
 async function exploreViewport(
   page: Page,
   projectKey: string,
@@ -74,7 +82,10 @@ async function exploreViewport(
   zip: AdmZip
 ): Promise<number> {
   let step = 0;
+  let staleSteps = 0;
   const visitedLabels = new Set<string>();
+  const triedActions = new Set<string>();
+  const actionHistory: string[] = [];
 
   // Capture initial state
   const initialPng = await page.screenshot({ fullPage: true, type: "png" });
@@ -97,6 +108,11 @@ async function exploreViewport(
         ? `Previously captured states: ${[...visitedLabels].join(", ")}`
         : "No states captured yet besides the initial view.";
 
+    const triedSummary =
+      actionHistory.length > 0
+        ? `Actions already tried (DO NOT repeat these):\n${actionHistory.map((a, i) => `  ${i + 1}. ${a}`).join("\n")}`
+        : "";
+
     const result = await explorerModel.generateContent({
       contents: [
         {
@@ -110,7 +126,7 @@ async function exploreViewport(
               },
             },
             {
-              text: `Current URL: ${page.url()}\nViewport: ${vpKey} (${page.viewportSize()?.width}x${page.viewportSize()?.height})\n${previousStates}\n\nWhat should I do next to discover new screens? Respond with ONLY valid JSON.`,
+              text: `Current URL: ${page.url()}\nViewport: ${vpKey} (${page.viewportSize()?.width}x${page.viewportSize()?.height})\n${previousStates}\n${triedSummary}\n\nWhat NEW action should I do next to discover a screen I haven't captured yet? If nothing new remains, set "done": true. Respond with ONLY valid JSON.`,
             },
           ],
         },
@@ -142,8 +158,36 @@ async function exploreViewport(
       break;
     }
 
-    // Execute all actions from Gemini
-    for (const action of parsed.actions || []) {
+    // Check if ALL proposed actions have already been tried
+    const proposedActions = parsed.actions || [];
+    const allRepeats =
+      proposedActions.length > 0 &&
+      proposedActions.every((a) => triedActions.has(actionSignature(a)));
+
+    if (allRepeats) {
+      staleSteps++;
+      console.warn(
+        `[AI Explorer] [${vpKey}] Step ${step}: all actions are repeats (stale ${staleSteps}/${MAX_STALE_STEPS})`
+      );
+      if (staleSteps >= MAX_STALE_STEPS) {
+        console.log(
+          `[AI Explorer] [${vpKey}] Aborting — ${MAX_STALE_STEPS} consecutive stale steps`
+        );
+        break;
+      }
+      step++;
+      continue;
+    }
+
+    staleSteps = 0;
+
+    // Execute actions and record them
+    for (const action of proposedActions) {
+      const sig = actionSignature(action);
+      triedActions.add(sig);
+      actionHistory.push(
+        `${action.type}${action.selector ? ` on "${action.selector}"` : ""} — ${action.description}`
+      );
       console.log(
         `[AI Explorer] [${vpKey}] Step ${step}: ${action.type} — ${action.description}`
       );
@@ -160,6 +204,18 @@ async function exploreViewport(
       const filename = `${projectKey}-${vpKey}-step${step}-${label}.png`;
       zip.addFile(filename, Buffer.from(statePng));
       console.log(`[AI Explorer] Saved: ${filename}`);
+    } else {
+      // Duplicate label — count as stale
+      staleSteps++;
+      console.warn(
+        `[AI Explorer] [${vpKey}] Step ${step}: duplicate label "${label}" (stale ${staleSteps}/${MAX_STALE_STEPS})`
+      );
+      if (staleSteps >= MAX_STALE_STEPS) {
+        console.log(
+          `[AI Explorer] [${vpKey}] Aborting — ${MAX_STALE_STEPS} consecutive stale steps`
+        );
+        break;
+      }
     }
 
     step++;

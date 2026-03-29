@@ -16,12 +16,12 @@
 8. [Motion System](#motion-system)
 9. [Page & Routing Architecture](#page--routing-architecture)
 10. [Documentation System (Fumadocs)](#documentation-system-fumadocs)
-11. [PWA Configuration](#pwa-configuration)
-12. [Data Flow & State Management](#data-flow--state-management)
-13. [Responsive Strategy](#responsive-strategy)
-14. [Design Tokens & Color System](#design-tokens--color-system)
-15. [Screenshot Export System](#screenshot-export-system)
-16. [Dev Tooling](#dev-tooling)
+11. [Screenshot Export System](#screenshot-export-system)
+12. [Dev Tooling](#dev-tooling)
+13. [PWA Configuration](#pwa-configuration)
+14. [Data Flow & State Management](#data-flow--state-management)
+15. [Responsive Strategy](#responsive-strategy)
+16. [Design Tokens & Color System](#design-tokens--color-system)
 
 ---
 
@@ -603,6 +603,182 @@ content/docs/
 ### Component Previews (`src/components/docs/component-previews.tsx`)
 
 Client component that provides interactive preview wrappers (`HeaderPreview`, `LeftSidebarPreview`, `MobilePreviewFramePreview`, `MobileFooterPreview`, `LoaderPreview`) importable from MDX pages. Each preview composes real library components inside a styled shell with its own local state.
+
+---
+
+## Screenshot Export System
+
+The project includes **two screenshot export pipelines** — a static one for deterministic captures and an AI-powered one for autonomous UI exploration.
+
+### Dependencies
+
+| Package                   | Role                                                  |
+| ------------------------- | ----------------------------------------------------- |
+| `playwright`              | Headless Chromium for server-side page rendering       |
+| `jszip`                   | Zip creation for the static export route               |
+| `adm-zip`                 | Zip creation for the AI explorer route (Node.js Buffer-native) |
+| `@google/generative-ai`   | Google Gemini 2.5 Flash SDK (vision + structured output) |
+
+`playwright` and `adm-zip` are listed in `serverExternalPackages` in `next.config.ts` to prevent webpack/turbopack from bundling their native binaries.
+
+### Environment Variables
+
+| Variable                | Required | Purpose                                           |
+| ----------------------- | -------- | ------------------------------------------------- |
+| `GEMINI_API_KEY`        | Yes (AI) | Google AI API key for Gemini 2.5 Flash            |
+| `NEXT_PUBLIC_BASE_URL`  | No       | Base URL for Playwright navigation (default: `http://localhost:3000`) |
+| `EXPORT_BASE_URL`       | No       | Override for the static export route only          |
+
+### Static Screenshot Export (`/api/export`)
+
+The original export route captures the three preview modes (mobile, tablet, desktop) of the demo app at fixed viewports:
+
+**File:** `src/app/api/export/route.ts`
+
+1. Launches headless Chromium with a single browser context at 2× device scale
+2. Navigates to `/demo/todolist`, waits for `[data-screenshot="preview-frame"]` to appear
+3. Iterates `VIEWPORTS` (defined in `src/app/api/export/types.ts`):
+   - Resizes the viewport to match each mode's dimensions
+   - Clicks the corresponding `button[data-preview-mode="${vp.id}"]`
+   - Waits 1.5s for animations to settle
+   - Screenshots the preview frame element
+4. Bundles all PNGs into a zip via JSZip and returns as `application/zip`
+
+**Viewport Configuration** (`src/app/api/export/types.ts`):
+
+| Mode    | Viewport Width | Viewport Height |
+| ------- | -------------- | --------------- |
+| mobile  | 1440           | 900             |
+| tablet  | 1440           | 1024            |
+| desktop | 1920           | 1200            |
+
+**Data Attributes** used for Playwright targeting:
+- `data-screenshot="preview-frame"` — on `MobilePreviewFrame` outer wrapper (all 3 frame variants)
+- `data-preview-mode="mobile|tablet|desktop"` — on both frame wrappers and mode switcher buttons in `todo-demo-shell.tsx`
+
+### AI-Powered Screenshot Explorer (`/api/screenshots/intelligent`)
+
+An agentic loop that uses **Gemini 2.5 Flash** with vision capabilities to autonomously discover and capture every unique UI state.
+
+**File:** `src/app/api/screenshots/intelligent/route.ts`
+
+#### Agentic Loop Architecture
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  For each seed route × each viewport (mobile/tablet/desktop) │
+│                                                              │
+│  1. Navigate to seed URL                                     │
+│  2. Capture initial screenshot → add to zip                  │
+│  3. Loop (max 25 steps):                                     │
+│     a. Take screenshot of current state                      │
+│     b. Send to Gemini (system prompt + screenshot + context) │
+│     c. Parse JSON response → { actions[], screenshotLabel,   │
+│        done }                                                │
+│     d. If done → break                                       │
+│     e. Execute each action via Playwright                    │
+│     f. Wait for animations to settle (1.2s)                  │
+│     g. Capture new state → add to zip if label is unique     │
+│  4. Close browser context                                    │
+│                                                              │
+│  Return zip of all captured PNGs                             │
+└──────────────────────────────────────────────────────────────┘
+```
+
+#### Gemini Prompt Strategy (`gemini-prompts.ts`)
+
+The system prompt instructs Gemini to act as a **UI exploration agent** with strict rules:
+- Prioritize discovering new states: open/close sidebars, click nav items, switch tabs, open modals/sheets, scroll containers
+- Never repeat a previously captured state
+- Output **strict JSON only** (no markdown) with `actions[]`, `screenshotLabel`, and `done` flag
+- When all states are explored, return `{ "done": true }`
+
+The user message includes: current URL, viewport name/dimensions, and a list of previously captured state labels to prevent duplicates.
+
+#### Action Types
+
+| Action Type      | Playwright Execution                                    |
+| ---------------- | ------------------------------------------------------- |
+| `click`          | `page.click(selector, { timeout: 5000 })`              |
+| `tap-tab`        | Same as `click` (semantic alias)                        |
+| `open-sidebar`   | Same as `click` (semantic alias)                        |
+| `close-sidebar`  | Same as `click` (semantic alias)                        |
+| `scroll`         | `window.scrollBy(0, window.innerHeight)`                |
+| `scroll-up`      | `window.scrollTo(0, 0)`                                |
+| `navigate`       | `page.goto(selector, { waitUntil: "networkidle" })`     |
+| `wait`           | `page.waitForTimeout(1000)`                             |
+
+All actions are wrapped in try/catch — failures are logged but do not abort the exploration loop.
+
+#### File Naming Convention
+
+Screenshots are saved with the pattern:
+
+```
+{projectKey}-{viewport}-step{N}-{sanitized-label}.png
+```
+
+Examples: `todolist-mobile-step0-initial.png`, `todolist-tablet-step3-sidebar-open-home-tab.png`
+
+Labels are sanitized: lowercased, non-alphanumeric characters replaced with hyphens, truncated to 60 characters.
+
+#### Project Registry (`screenshot-config.ts`)
+
+```ts
+export const screenshotProjects = {
+  todolist: {
+    name: "TodoList Demo",
+    seedRoutes: ["/demo/todolist"],
+  },
+  docs: {
+    name: "Component Docs",
+    seedRoutes: ["/docs"],
+  },
+} as const;
+```
+
+New demo projects only need a new entry here — the AI explorer handles route discovery autonomously from the seed URLs.
+
+#### Safety Constraints
+
+- **Max steps per viewport**: 25 (configurable via `MAX_STEPS`)
+- **Route timeout**: `maxDuration = 300` (5 minutes)
+- **Action timeout**: 5s per click, 10s per navigation
+- **Settle delay**: 1.2s between actions for CSS animations to complete
+- **Duplicate detection**: labels tracked in a `Set<string>` per viewport — repeated labels skip screenshot capture
+- **Graceful failure**: JSON parse errors break the loop for that viewport; individual action failures are logged and skipped
+
+### Gemini Client (`src/lib/gemini-client.ts`)
+
+Reusable singleton for the Google Generative AI SDK:
+
+```ts
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+export const explorerModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+```
+
+Server-only module — never imported in client components.
+
+### Viewport Presets (`src/lib/screenshot-utils.ts`)
+
+Shared viewport dimensions used by the intelligent route:
+
+| Key     | Width | Height | Device Scale |
+| ------- | ----- | ------ | ------------ |
+| mobile  | 1440  | 900    | 2×           |
+| tablet  | 1440  | 1024   | 2×           |
+| desktop | 1920  | 1200   | 2×           |
+
+### UI Integration (`intelligent-button.tsx`)
+
+A `"use client"` button component placed in `todo-demo-shell.tsx` alongside the static export button:
+
+- Fetches `/api/screenshots/intelligent?project=todolist`
+- Shows loading spinner (`Loader2`) and "AI Exploring…" text while the AI explores
+- Downloads the resulting zip blob as `{project}-ai-screenshots.zip`
+- Accepts a `project` prop (defaults to `"todolist"`) for targeting different demo projects
 
 ---
 
