@@ -15,10 +15,12 @@
 7. [Custom Hooks](#custom-hooks)
 8. [Motion System](#motion-system)
 9. [Page & Routing Architecture](#page--routing-architecture)
-10. [PWA Configuration](#pwa-configuration)
-11. [Data Flow & State Management](#data-flow--state-management)
-12. [Responsive Strategy](#responsive-strategy)
-13. [Design Tokens & Color System](#design-tokens--color-system)
+10. [Documentation System (Fumadocs)](#documentation-system-fumadocs)
+11. [PWA Configuration](#pwa-configuration)
+12. [Data Flow & State Management](#data-flow--state-management)
+13. [Responsive Strategy](#responsive-strategy)
+14. [Design Tokens & Color System](#design-tokens--color-system)
+15. [Dev Tooling](#dev-tooling)
 
 ---
 
@@ -33,6 +35,7 @@
 | Motion         | Framer Motion 12                                    |
 | Icons          | Lucide React                                        |
 | Theme          | Custom `ThemeProvider` (class strategy, localStorage) |
+| Documentation  | Fumadocs (fumadocs-core + fumadocs-ui + fumadocs-mdx) |
 | PWA            | `next-pwa` (service worker, manifest)               |
 | Linting        | Biome 2.4 (formatter + linter) + ESLint (Next.js)   |
 | Package Manager| Bun                                                 |
@@ -46,14 +49,23 @@
 conusai-ui/
 ├── src/
 │   ├── app/                          # Next.js App Router
-│   │   ├── globals.css               # Tailwind 4 theme, design tokens, base styles
-│   │   ├── layout.tsx                # Root layout: fonts, metadata, ThemeProvider
+│   │   ├── globals.css               # Tailwind 4 theme, design tokens, base styles + fumadocs-ui styles
+│   │   ├── layout.tsx                # Root layout: fonts, metadata, ThemeProvider, DevServiceWorkerReset
 │   │   ├── manifest.ts               # PWA Web App Manifest (programmatic)
-│   │   ├── page.tsx                  # Root redirect → /demo/todolist
-│   │   └── demo/todolist/page.tsx    # TodoList demo page (RSC shell)
+│   │   ├── page.tsx                  # Root redirect → /docs
+│   │   ├── api/
+│   │   │   └── search/route.ts       # Fumadocs full-text search endpoint (GET)
+│   │   ├── demo/
+│   │   │   └── todolist/page.tsx     # TodoList demo page (RSC shell)
+│   │   └── docs/
+│   │       ├── layout.tsx            # Fumadocs DocsLayout + RootProvider shell
+│   │       └── [[...slug]]/page.tsx  # Fumadocs catch-all MDX page renderer
 │   │
 │   ├── components/
 │   │   ├── theme-provider.tsx        # Zero-dependency theme context (light/dark/system)
+│   │   ├── dev-service-worker-reset.tsx  # Dev-only stale SW / cache cleanup
+│   │   ├── docs/
+│   │   │   └── component-previews.tsx    # Interactive preview wrappers for Fumadocs MDX pages
 │   │   ├── conusai-ui/               # ★ Exportable ConusAI component library
 │   │   │   ├── header/
 │   │   │   │   ├── header.tsx
@@ -102,10 +114,27 @@ conusai-ui/
 │   │       └── use-todo-demo-state.ts
 │   │
 │   ├── lib/
-│   │   └── utils.ts                  # cn() — clsx + tailwind-merge utility
+│   │   ├── utils.ts                  # cn() — clsx + tailwind-merge utility
+│   │   └── docs/
+│   │       └── source.ts             # Fumadocs loader (connects generated .source → app routes)
 │   │
 │   └── types/
 │       └── next-pwa.d.ts             # Type declaration for next-pwa (no built-in types)
+│
+├── content/
+│   └── docs/                         # MDX documentation source files (Fumadocs)
+│       ├── meta.json                 # Root nav ordering
+│       ├── index.mdx                 # Docs landing page
+│       ├── getting-started.mdx       # Getting started guide
+│       └── components/
+│           ├── meta.json             # Component docs ordering
+│           ├── header.mdx
+│           ├── left-sidebar.mdx
+│           ├── loader.mdx
+│           ├── mobile-footer.mdx
+│           └── mobile-preview-frame.mdx
+│
+├── .source/                          # Generated Fumadocs output (git-ignored)
 │
 ├── components/                       # Placeholder dirs for future shadcn registry exports
 │   ├── conusai-ui/                   # (empty — future package export target)
@@ -119,8 +148,9 @@ conusai-ui/
 ├── docs/
 │   └── lib.md                        # This document
 │
+├── source.config.ts                  # Fumadocs MDX source + rehype code theme config
 ├── package.json                      # Dependencies & scripts
-├── next.config.ts                    # Next.js + PWA config
+├── next.config.ts                    # Next.js + PWA + Fumadocs MDX config
 ├── tsconfig.json                     # TypeScript (strict, bundler resolution, @/* alias)
 ├── biome.json                        # Biome linter/formatter config
 ├── eslint.config.mjs                 # ESLint (next core-web-vitals + typescript)
@@ -137,17 +167,26 @@ conusai-ui/
 ### Next.js 16 Configuration (`next.config.ts`)
 
 ```ts
+import { createMDX } from "fumadocs-mdx/next";
+import type { NextConfig } from "next";
+import withPWA from "next-pwa";
+
+const withMDX = createMDX();
+
 const nextConfig: NextConfig = {
   reactCompiler: true,   // Enables the React Compiler (automatic memoization)
   turbopack: {},          // Required by Next 16 for build checks
 };
 
-export default withPWA({ dest: "public", ... })(nextConfig);
+export default withMDX(
+  withPWA({ dest: "public", disable: process.env.NODE_ENV === "development", ... })(nextConfig)
+);
 ```
 
 - **React Compiler** is enabled, eliminating the need for manual `useMemo`/`useCallback` in most cases (though the codebase still uses them explicitly in performance-critical paths like `visibleTodos` filtering).
 - **Turbopack** is enabled for dev server bundling.
-- **next-pwa** wraps the config to generate service worker assets.
+- **Fumadocs MDX** wraps the outer config via `createMDX()` to process `.mdx` files in `content/docs`.
+- **next-pwa** wraps the inner config to generate service worker assets.
 
 ### Linting & Formatting
 
@@ -216,6 +255,7 @@ Uses **CSS-first configuration** (no `tailwind.config.ts`):
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "fumadocs-ui/style.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -458,15 +498,103 @@ All animations use **Framer Motion** with a consistent approach:
 ## Page & Routing Architecture
 
 ```
-/                          → redirects to /demo/todolist (server redirect)
+/                          → redirects to /docs (server redirect)
+/docs                      → Fumadocs documentation site (landing page)
+/docs/getting-started      → Getting started guide
+/docs/components/*         → Component-level documentation pages
 /demo/todolist             → TodoListDemoPage (RSC) → <TodoDemo /> (client)
+/api/search                → Fumadocs full-text search endpoint (GET)
 ```
 
-- **Root page** (`src/app/page.tsx`): Server component that calls `redirect("/demo/todolist")`
-- **Root layout** (`src/app/layout.tsx`): Server component that sets up fonts, metadata, viewport config, and wraps children in `ThemeProvider`
-- **Demo page** (`src/app/demo/todolist/page.tsx`): Server component shell with metadata, renders the client-only `<TodoDemo />`
+- **Root page** (`src/app/page.tsx`): Server component that calls `redirect("/docs")`
+- **Root layout** (`src/app/layout.tsx`): Server component that sets up fonts, metadata, viewport config, mounts `DevServiceWorkerReset`, and wraps children in `ThemeProvider`
+- **Docs layout** (`src/app/docs/layout.tsx`): Wraps docs pages in Fumadocs `RootProvider` + `DocsLayout` with nav tree, search, and links to the demo
+- **Docs page** (`src/app/docs/[[...slug]]/page.tsx`): Catch-all renderer using `source.getPage(slug)` to resolve MDX content, generates static params via `source.generateParams()`
+- **Demo page** (`src/app/demo/todolist/page.tsx`): Server component shell with metadata, renders the client-only `<TodoListDemo />`
+- **Search route** (`src/app/api/search/route.ts`): GET handler created via `createFromSource(source)` for Fumadocs full-text search
 
-The RSC → Client boundary is clean: only `TodoDemo` and its children are client components. Layout and page shells remain server components.
+The RSC → Client boundary is clean: only `TodoListDemo` and its children are client components. Layout and page shells remain server components.
+
+---
+
+## Documentation System (Fumadocs)
+
+The project uses **Fumadocs** for an in-app documentation site rendered from MDX files.
+
+### Dependencies
+
+| Package              | Role                                              |
+| -------------------- | ------------------------------------------------- |
+| `fumadocs-core`      | Source loader, page tree, search server utilities  |
+| `fumadocs-ui`        | `DocsLayout`, `DocsPage`, `DocsBody`, `RootProvider`, default MDX components |
+| `fumadocs-mdx`       | MDX compilation, `createMDX()` Next.js plugin, `defineDocs`/`defineConfig` |
+| `@fumadocs/cli`      | (dev) CLI tooling for codegen                     |
+| `@next/mdx`, `@mdx-js/loader`, `@mdx-js/react` | MDX runtime and loader chain |
+
+### Source Pipeline
+
+1. **`source.config.ts`** — registers `content/docs` as the docs directory and configures rehype code-block themes (`github-light` / `github-dark`).
+2. **`.source/`** (generated, git-ignored) — Fumadocs codegen output. Created on build/dev start by the `fumadocs-mdx` plugin.
+3. **`src/lib/docs/source.ts`** — connects the generated source to Fumadocs' `loader()`:
+   ```ts
+   import { loader } from "fumadocs-core/source";
+   import { docs } from "../../../.source/server";
+
+   export const source = loader({
+     baseUrl: "/docs",
+     source: docs.toFumadocsSource(),
+   });
+   ```
+
+### Docs Layout (`src/app/docs/layout.tsx`)
+
+Wraps all `/docs/**` routes in:
+- `RootProvider` — Fumadocs context (theme disabled since the app has its own `ThemeProvider`; search enabled)
+- `DocsLayout` — sidebar nav tree from `source.pageTree`, top nav with "ConusAI Docs" title and link to the Todo demo
+
+### Docs Page Renderer (`src/app/docs/[[...slug]]/page.tsx`)
+
+- `generateStaticParams()` calls `source.generateParams()` for static export of all docs pages
+- `generateMetadata()` resolves page title/description from frontmatter
+- Renders `DocsPage` → `DocsTitle` + `DocsDescription` + `DocsBody` → MDX content with default Fumadocs components + `createRelativeLink`
+
+### Search (`src/app/api/search/route.ts`)
+
+A GET route handler created from `createFromSource(source)` providing full-text search across all docs pages even without an external search backend.
+
+### Content Structure (`content/docs/`)
+
+```
+content/docs/
+├── meta.json                # Root nav ordering: ["index", "getting-started", "---Components---", "components"]
+├── index.mdx                # Docs landing page
+├── getting-started.mdx      # Setup and docs-authoring guide
+└── components/
+    ├── meta.json            # Component nav ordering
+    ├── header.mdx
+    ├── left-sidebar.mdx
+    ├── loader.mdx
+    ├── mobile-footer.mdx
+    └── mobile-preview-frame.mdx
+```
+
+### Component Previews (`src/components/docs/component-previews.tsx`)
+
+Client component that provides interactive preview wrappers (`HeaderPreview`, `LeftSidebarPreview`, `MobilePreviewFramePreview`, `MobileFooterPreview`, `LoaderPreview`) importable from MDX pages. Each preview composes real library components inside a styled shell with its own local state.
+
+---
+
+## Dev Tooling
+
+### Service Worker Reset (`src/components/dev-service-worker-reset.tsx`)
+
+A **development-only** client component mounted in the root layout (`src/app/layout.tsx`) before `ThemeProvider`. On mount in non-production:
+
+1. Unregisters all existing service worker registrations
+2. Clears all Cache Storage entries
+3. If stale registrations were found and the session flag `conusai-dev-sw-reset` has not been set, reloads once
+
+This prevents stale `next-pwa` service workers from serving outdated client chunks during development, which can cause runtime module-factory errors.
 
 ---
 
