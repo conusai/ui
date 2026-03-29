@@ -19,12 +19,24 @@ function SidebarPanel({
   onClose,
   onChange,
   onDelete,
+  panelEyebrow,
+  panelTitle,
+  backLabel,
+  showDeleteButton,
+  emptyState,
+  children,
   inline,
 }: {
   todo: EditableTodo | null;
   onClose: () => void;
-  onChange: (patch: Partial<EditableTodo>) => void;
-  onDelete: () => void;
+  onChange?: (patch: Partial<EditableTodo>) => void;
+  onDelete?: () => void;
+  panelEyebrow: string;
+  panelTitle: string;
+  backLabel: string;
+  showDeleteButton: boolean;
+  emptyState?: React.ReactNode;
+  children?: React.ReactNode;
   inline: boolean;
 }) {
   const priorityVariants = cva(
@@ -50,30 +62,36 @@ function SidebarPanel({
             className="touch-target"
           >
             <ArrowLeft />
-            Back
+            {backLabel}
           </Button>
           {inline ? (
             <div>
               <p className="font-heading text-xs uppercase tracking-[0.24em] text-muted-foreground">
-                Inspector
+                {panelEyebrow}
               </p>
-              <h2 className="mt-1 text-lg font-semibold">Task detail</h2>
+              <h2 className="mt-1 text-lg font-semibold">{panelTitle}</h2>
             </div>
           ) : null}
         </div>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={onDelete}
-          aria-label="Delete task"
-          disabled={!todo}
-          className="touch-target"
-        >
-          <Trash2 className="text-destructive" />
-        </Button>
+        {showDeleteButton ? (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={onDelete}
+            aria-label="Delete task"
+            disabled={!todo && !onDelete}
+            className="touch-target"
+          >
+            <Trash2 className="text-destructive" />
+          </Button>
+        ) : null}
       </div>
 
-      {todo ? (
+      {children ? (
+        <div className="mt-5 flex min-h-0 flex-1 flex-col overflow-hidden">
+          {children}
+        </div>
+      ) : todo ? (
         <>
           <div className="mt-6 space-y-5">
             <div className="space-y-2">
@@ -81,7 +99,7 @@ function SidebarPanel({
               <Input
                 id="task-title"
                 value={todo.title}
-                onChange={(event) => onChange({ title: event.target.value })}
+                onChange={(event) => onChange?.({ title: event.target.value })}
               />
             </div>
 
@@ -91,7 +109,7 @@ function SidebarPanel({
                 id="task-description"
                 value={todo.description}
                 onChange={(event) =>
-                  onChange({ description: event.target.value })
+                  onChange?.({ description: event.target.value })
                 }
                 className="min-h-32 w-full rounded-[1.15rem] border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
               />
@@ -104,7 +122,7 @@ function SidebarPanel({
                   <button
                     key={priority}
                     type="button"
-                    onClick={() => onChange({ priority })}
+                    onClick={() => onChange?.({ priority })}
                     className={cn(
                       priorityVariants({ active: todo.priority === priority })
                     )}
@@ -123,10 +141,12 @@ function SidebarPanel({
           </div>
         </>
       ) : (
-        <div className="my-auto rounded-[1.6rem] border border-dashed border-border/80 bg-background/70 p-5 text-sm text-muted-foreground">
-          Select a task to inspect how the detail panel adapts on larger
-          layouts.
-        </div>
+        (emptyState ?? (
+          <div className="my-auto rounded-[1.6rem] border border-dashed border-border/80 bg-background/70 p-5 text-sm text-muted-foreground">
+            Select a task to inspect how the detail panel adapts on larger
+            layouts.
+          </div>
+        ))
       )}
     </div>
   );
@@ -147,14 +167,29 @@ const rightSidebarVariants = cva("flex flex-col border-l backdrop-blur-2xl", {
 
 const RightSidebar = React.forwardRef<HTMLElement, RightSidebarProps>(
   (
-    { open, todo, onClose, onChange, onDelete, variant = "overlay", className },
+    {
+      open,
+      todo = null,
+      onClose,
+      onChange,
+      onDelete,
+      variant = "overlay",
+      className,
+      panelEyebrow = "Inspector",
+      panelTitle = "Task detail",
+      backLabel = "Back",
+      showDeleteButton = true,
+      emptyState,
+      children,
+    },
     ref
   ) => {
     const shouldReduceMotion = useReducedMotionPreference();
     const panelVariants = createPanelVariants(shouldReduceMotion);
+    const hasContent = Boolean(todo || children);
 
     if (variant === "inline") {
-      if (!open || !todo) {
+      if (!open || !hasContent) {
         return null;
       }
 
@@ -175,8 +210,15 @@ const RightSidebar = React.forwardRef<HTMLElement, RightSidebarProps>(
               onClose={onClose}
               onChange={onChange}
               onDelete={onDelete}
+              panelEyebrow={panelEyebrow}
+              panelTitle={panelTitle}
+              backLabel={backLabel}
+              showDeleteButton={showDeleteButton}
+              emptyState={emptyState}
               inline
-            />
+            >
+              {children}
+            </SidebarPanel>
           </motion.aside>
         </AnimatePresence>
       );
@@ -184,7 +226,7 @@ const RightSidebar = React.forwardRef<HTMLElement, RightSidebarProps>(
 
     return (
       <AnimatePresence>
-        {open && todo ? (
+        {open && hasContent ? (
           <>
             <motion.button
               type="button"
@@ -210,8 +252,15 @@ const RightSidebar = React.forwardRef<HTMLElement, RightSidebarProps>(
                 onClose={onClose}
                 onChange={onChange}
                 onDelete={onDelete}
+                panelEyebrow={panelEyebrow}
+                panelTitle={panelTitle}
+                backLabel={backLabel}
+                showDeleteButton={showDeleteButton}
+                emptyState={emptyState}
                 inline={false}
-              />
+              >
+                {children}
+              </SidebarPanel>
             </motion.aside>
           </>
         ) : null}

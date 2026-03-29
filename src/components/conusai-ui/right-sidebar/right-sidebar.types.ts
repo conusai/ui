@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef } from "react";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
 export type EditableTodo = {
   id: string;
@@ -9,12 +9,18 @@ export type EditableTodo = {
 
 export type RightSidebarProps = Omit<
   ComponentPropsWithoutRef<"aside">,
-  "onChange" | "onDelete"
+  "onChange" | "onDelete" | "children"
 > & {
   open: boolean;
-  todo: EditableTodo | null;
+  todo?: EditableTodo | null;
   onClose: () => void;
-  onChange: (patch: Partial<EditableTodo>) => void;
-  onDelete: () => void;
+  onChange?: (patch: Partial<EditableTodo>) => void;
+  onDelete?: () => void;
   variant?: "overlay" | "inline";
+  panelEyebrow?: string;
+  panelTitle?: string;
+  backLabel?: string;
+  showDeleteButton?: boolean;
+  emptyState?: ReactNode;
+  children?: ReactNode;
 };
