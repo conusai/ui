@@ -21,6 +21,11 @@ export type RightSidebarProps = Omit<
   panelTitle?: string;
   backLabel?: string;
   showDeleteButton?: boolean;
+  backButtonAsChild?: boolean;
+  backButtonChild?: ReactNode;
+  deleteButtonAsChild?: boolean;
+  deleteButtonChild?: ReactNode;
+  deleteButtonLabel?: string;
   emptyState?: ReactNode;
   children?: ReactNode;
 };

@@ -23,6 +23,11 @@ function SidebarPanel({
   panelTitle,
   backLabel,
   showDeleteButton,
+  backButtonAsChild,
+  backButtonChild,
+  deleteButtonAsChild,
+  deleteButtonChild,
+  deleteButtonLabel,
   emptyState,
   children,
   inline,
@@ -35,6 +40,11 @@ function SidebarPanel({
   panelTitle: string;
   backLabel: string;
   showDeleteButton: boolean;
+  backButtonAsChild: boolean;
+  backButtonChild?: React.ReactNode;
+  deleteButtonAsChild: boolean;
+  deleteButtonChild?: React.ReactNode;
+  deleteButtonLabel: string;
   emptyState?: React.ReactNode;
   children?: React.ReactNode;
   inline: boolean;
@@ -56,13 +66,19 @@ function SidebarPanel({
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Button
+            asChild={backButtonAsChild && Boolean(backButtonChild)}
             variant="ghost"
             size="sm"
             onClick={onClose}
             className="touch-target"
+            aria-label={backLabel}
           >
-            <ArrowLeft />
-            {backLabel}
+            {backButtonChild ?? (
+              <>
+                <ArrowLeft />
+                {backLabel}
+              </>
+            )}
           </Button>
           {inline ? (
             <div>
@@ -75,14 +91,15 @@ function SidebarPanel({
         </div>
         {showDeleteButton ? (
           <Button
+            asChild={deleteButtonAsChild && Boolean(deleteButtonChild)}
             variant="ghost"
             size="icon-sm"
             onClick={onDelete}
-            aria-label="Delete task"
+            aria-label={deleteButtonLabel}
             disabled={!todo && !onDelete}
             className="touch-target"
           >
-            <Trash2 className="text-destructive" />
+            {deleteButtonChild ?? <Trash2 className="text-destructive" />}
           </Button>
         ) : null}
       </div>
@@ -179,6 +196,11 @@ const RightSidebar = React.forwardRef<HTMLElement, RightSidebarProps>(
       panelTitle = "Task detail",
       backLabel = "Back",
       showDeleteButton = true,
+      backButtonAsChild = false,
+      backButtonChild,
+      deleteButtonAsChild = false,
+      deleteButtonChild,
+      deleteButtonLabel = "Delete task",
       emptyState,
       children,
     },
@@ -214,6 +236,11 @@ const RightSidebar = React.forwardRef<HTMLElement, RightSidebarProps>(
               panelTitle={panelTitle}
               backLabel={backLabel}
               showDeleteButton={showDeleteButton}
+              backButtonAsChild={backButtonAsChild}
+              backButtonChild={backButtonChild}
+              deleteButtonAsChild={deleteButtonAsChild}
+              deleteButtonChild={deleteButtonChild}
+              deleteButtonLabel={deleteButtonLabel}
               emptyState={emptyState}
               inline
             >
@@ -256,6 +283,11 @@ const RightSidebar = React.forwardRef<HTMLElement, RightSidebarProps>(
                 panelTitle={panelTitle}
                 backLabel={backLabel}
                 showDeleteButton={showDeleteButton}
+                backButtonAsChild={backButtonAsChild}
+                backButtonChild={backButtonChild}
+                deleteButtonAsChild={deleteButtonAsChild}
+                deleteButtonChild={deleteButtonChild}
+                deleteButtonLabel={deleteButtonLabel}
                 emptyState={emptyState}
                 inline={false}
               >
@@ -269,6 +301,6 @@ const RightSidebar = React.forwardRef<HTMLElement, RightSidebarProps>(
   }
 );
 
-RightSidebar.displayName = "RightSidebar";
+RightSidebar.displayName = "ConusRightSidebar";
 
 export { RightSidebar };

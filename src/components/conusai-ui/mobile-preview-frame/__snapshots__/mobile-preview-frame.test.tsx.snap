@@ -1,0 +1,29 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`MobilePreviewFrame > matches snapshot 1`] = `
+<div
+  class="relative mx-auto w-full max-w-[420px]"
+  data-preview-mode="mobile"
+  data-screenshot="preview-frame"
+  data-screenshot-crop="false"
+  data-slot="conus-mobile-preview-frame"
+>
+  <div
+    class="pointer-events-none absolute inset-x-6 top-0 z-10 h-16 rounded-b-[2rem] bg-[linear-gradient(180deg,rgba(9,17,31,0.85),rgba(9,17,31,0.65))] blur-2xl"
+  />
+  <div
+    class="relative rounded-[2.8rem] border border-foreground/10 bg-[linear-gradient(180deg,rgba(9,17,31,0.95),rgba(17,29,52,0.98))] p-3 shadow-[0_36px_120px_-42px_rgba(10,16,31,0.85)]"
+  >
+    <div
+      class="absolute left-1/2 top-3 h-6 w-32 -translate-x-1/2 rounded-full bg-black/70"
+    />
+    <div
+      class="relative aspect-[375/812] overflow-hidden rounded-[2.2rem] border border-white/8 bg-background"
+    >
+      <div
+        class="h-full bg-background"
+      />
+    </div>
+  </div>
+</div>
+`;

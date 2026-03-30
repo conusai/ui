@@ -12,6 +12,7 @@ import {
 import { useState } from "react";
 import type { FooterTab, NavItem } from "@/components/conusai-ui";
 import {
+  ComponentPreview,
   Header,
   LeftSidebar,
   Loader,
@@ -41,30 +42,11 @@ const footerItems: FooterTab[] = [
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
-function PreviewShell({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div
-      className={cn(
-        "overflow-hidden rounded-[1.75rem] border border-border/70 bg-card/90 shadow-[0_32px_90px_-50px_rgba(10,16,31,0.55)]",
-        className
-      )}
-    >
-      {children}
-    </div>
-  );
-}
-
 export function HeaderPreview() {
   const [language, setLanguage] = useState("en");
 
   return (
-    <PreviewShell>
+    <ComponentPreview>
       <Header
         title="ConusAI"
         subtitle="Operations Center"
@@ -73,7 +55,7 @@ export function HeaderPreview() {
         onLanguageChange={setLanguage}
         onMenuClick={() => undefined}
       />
-    </PreviewShell>
+    </ComponentPreview>
   );
 }
 
@@ -81,7 +63,7 @@ export function LeftSidebarPreview() {
   const [activeItem, setActiveItem] = useState("tasks");
 
   return (
-    <PreviewShell className="h-[540px] bg-sidebar/50">
+    <ComponentPreview className="h-[540px] bg-sidebar/50">
       <LeftSidebar
         open
         variant="inline"
@@ -90,7 +72,7 @@ export function LeftSidebarPreview() {
         onClose={() => undefined}
         onSelect={setActiveItem}
       />
-    </PreviewShell>
+    </ComponentPreview>
   );
 }
 
@@ -182,7 +164,7 @@ export function MobileFooterPreview() {
   const [activeItem, setActiveItem] = useState("activity");
 
   return (
-    <PreviewShell className="relative h-[340px] bg-[linear-gradient(180deg,rgba(251,253,255,0.92),rgba(241,247,255,0.78))] p-4 dark:bg-[linear-gradient(180deg,rgba(10,18,30,0.98),rgba(15,26,44,0.98))]">
+    <ComponentPreview className="relative h-[340px] bg-[linear-gradient(180deg,rgba(251,253,255,0.92),rgba(241,247,255,0.78))] p-4 dark:bg-[linear-gradient(180deg,rgba(10,18,30,0.98),rgba(15,26,44,0.98))]">
       <div className="rounded-[1.6rem] border border-dashed border-border/80 bg-background/70 p-5 text-sm text-muted-foreground">
         Keep primary navigation anchored to the thumb zone while the rest of the
         screen scrolls freely.
@@ -192,7 +174,7 @@ export function MobileFooterPreview() {
         activeItem={activeItem}
         onChange={setActiveItem}
       />
-    </PreviewShell>
+    </ComponentPreview>
   );
 }
 
@@ -200,7 +182,7 @@ export function LoaderPreview() {
   const [visible, setVisible] = useState(true);
 
   return (
-    <PreviewShell className="overflow-hidden">
+    <ComponentPreview className="overflow-hidden">
       <div className="relative h-[360px] bg-[linear-gradient(180deg,rgba(251,253,255,0.9),rgba(241,247,255,0.75))] p-5 dark:bg-[linear-gradient(180deg,rgba(10,18,30,0.98),rgba(15,26,44,0.98))]">
         <div className="flex h-full flex-col justify-between rounded-[1.75rem] border border-border/70 bg-card/80 p-5">
           <div>
@@ -219,6 +201,6 @@ export function LoaderPreview() {
         </div>
         <Loader visible={visible} />
       </div>
-    </PreviewShell>
+    </ComponentPreview>
   );
 }

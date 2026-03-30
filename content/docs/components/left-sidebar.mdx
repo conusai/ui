@@ -11,6 +11,27 @@ import { LeftSidebarPreview } from "@/components/docs/component-previews";
 
 <LeftSidebarPreview />
 
+## Usage
+
+```tsx
+import { Home, Inbox } from "lucide-react";
+import { LeftSidebar } from "@conusai/ui";
+
+const items = [
+	{ id: "overview", label: "Overview", icon: Home },
+	{ id: "tasks", label: "Tasks", icon: Inbox, meta: "24" },
+];
+
+<LeftSidebar
+	open
+	variant="inline"
+	items={items}
+	activeItem="tasks"
+	onClose={() => undefined}
+	onSelect={(id) => console.log(id)}
+/>
+```
+
 ## Notes
 
 - `variant="overlay"` is designed for constrained canvases.

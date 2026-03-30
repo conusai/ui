@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef } from "react";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
 export type LanguageOption = {
   value: string;
@@ -10,7 +10,7 @@ export type LanguagePickerPresentation = "auto" | "sheet" | "dropdown";
 
 export type LanguagePickerProps = Omit<
   ComponentPropsWithoutRef<"button">,
-  "onChange"
+  "onChange" | "children"
 > & {
   options: LanguageOption[];
   value: string;
@@ -18,4 +18,7 @@ export type LanguagePickerProps = Omit<
   presentation?: LanguagePickerPresentation;
   triggerVariant?: "outline" | "ghost";
   ariaLabel?: string;
+  asChild?: boolean;
+  children?: ReactNode;
+  title?: string;
 };

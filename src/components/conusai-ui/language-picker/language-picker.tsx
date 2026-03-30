@@ -46,6 +46,9 @@ const LanguagePicker = React.forwardRef<HTMLButtonElement, LanguagePickerProps>(
       presentation = "auto",
       triggerVariant = "outline",
       ariaLabel = "Change language",
+      asChild = false,
+      children,
+      title = "Language",
       className,
       ...props
     },
@@ -60,6 +63,7 @@ const LanguagePicker = React.forwardRef<HTMLButtonElement, LanguagePickerProps>(
     const trigger = (
       <Button
         ref={ref}
+        asChild={asChild && Boolean(children)}
         variant={triggerVariant === "ghost" ? "ghost" : "outline"}
         size="icon-sm"
         className={cn(
@@ -69,7 +73,7 @@ const LanguagePicker = React.forwardRef<HTMLButtonElement, LanguagePickerProps>(
         aria-label={ariaLabel}
         {...props}
       >
-        <Globe />
+        {children ?? <Globe />}
       </Button>
     );
 
@@ -83,7 +87,7 @@ const LanguagePicker = React.forwardRef<HTMLButtonElement, LanguagePickerProps>(
           >
             <div className="mx-auto mt-2 h-1.5 w-14 rounded-full bg-border" />
             <div className="px-4 pt-6">
-              <SheetTitle className="font-heading text-lg">Language</SheetTitle>
+              <SheetTitle className="font-heading text-lg">{title}</SheetTitle>
               <div className="mt-4 grid gap-2">
                 {options.map((option) => (
                   <button
@@ -137,6 +141,6 @@ const LanguagePicker = React.forwardRef<HTMLButtonElement, LanguagePickerProps>(
   }
 );
 
-LanguagePicker.displayName = "LanguagePicker";
+LanguagePicker.displayName = "ConusLanguagePicker";
 
 export { LanguagePicker };

@@ -11,6 +11,24 @@ import { MobileFooterPreview } from "@/components/docs/component-previews";
 
 <MobileFooterPreview />
 
+## Usage
+
+```tsx
+import { Home, Settings } from "lucide-react";
+import { MobileFooter } from "@conusai/ui";
+
+const items = [
+	{ id: "home", label: "Home", icon: Home },
+	{ id: "settings", label: "Settings", icon: Settings },
+];
+
+<MobileFooter
+	items={items}
+	activeItem="home"
+	onChange={(id) => console.log(id)}
+/>
+```
+
 ## Notes
 
 - Best suited for 3 to 5 top-level destinations.

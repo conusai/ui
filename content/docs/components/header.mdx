@@ -11,6 +11,26 @@ Use `Header` as the main top bar in mobile and compact workspace surfaces.
 
 <HeaderPreview />
 
+## Usage
+
+```tsx
+import { Header } from "@conusai/ui";
+
+const languages = [
+	{ value: "en", label: "English", flag: "US" },
+	{ value: "lt", label: "Lithuanian", flag: "LT" },
+];
+
+<Header
+	title="Operations"
+	subtitle="ConusAI"
+	language="en"
+	languages={languages}
+	onLanguageChange={(value) => console.log(value)}
+	onMenuClick={() => console.log("menu")}
+/>
+```
+
 ## Notes
 
 - The component is client-side because it relies on theme and device-adaptive interactions.

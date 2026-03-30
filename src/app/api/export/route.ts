@@ -1,6 +1,13 @@
 import JSZip from "jszip";
+import type { NextRequest } from "next/server";
 import type { Browser } from "playwright";
 import { chromium } from "playwright";
+
+import {
+  type ProjectKey,
+  screenshotProjects,
+} from "@/tools/screenshot-generator";
+
 import { VIEWPORTS } from "./types";
 
 export const maxDuration = 120;
@@ -8,9 +15,20 @@ export const dynamic = "force-dynamic";
 
 const SETTLE_MS = 1500;
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const projectKey =
+    (request.nextUrl.searchParams.get("project") as ProjectKey) || "todolist";
+  const project = screenshotProjects[projectKey];
+
+  if (!project) {
+    return new Response(
+      JSON.stringify({ error: "Missing or invalid project parameter" }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
   const baseUrl = process.env.EXPORT_BASE_URL || "http://localhost:3000";
-  const targetPath = "/demo/todolist";
+  const seedRoute = project.seedRoutes[0];
 
   let browser: Browser | undefined;
   try {
@@ -24,7 +42,7 @@ export async function GET() {
     });
     const page = await context.newPage();
 
-    await page.goto(`${baseUrl}${targetPath}`, {
+    await page.goto(`${baseUrl}${seedRoute}`, {
       waitUntil: "networkidle",
     });
 
@@ -46,7 +64,7 @@ export async function GET() {
       // Screenshot the preview frame element
       const frame = page.locator('[data-screenshot="preview-frame"]');
       const png = await frame.screenshot({ type: "png" });
-      zip.file(`conusai-${vp.id}.png`, png);
+      zip.file(`${projectKey}-${vp.id}.png`, png);
     }
 
     await context.close();
@@ -56,7 +74,7 @@ export async function GET() {
     return new Response(zipBuffer, {
       headers: {
         "Content-Type": "application/zip",
-        "Content-Disposition": 'attachment; filename="conusai-screenshots.zip"',
+        "Content-Disposition": `attachment; filename="${projectKey}-screenshots.zip"`,
       },
     });
   } catch (error) {

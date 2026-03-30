@@ -1,7 +1,7 @@
 {
   "name": "@conusai/ui",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -11,6 +11,21 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./motion": {
+      "types": "./dist/motion.d.ts",
+      "import": "./dist/motion.js",
+      "require": "./dist/motion.cjs"
+    },
+    "./theme-provider": {
+      "types": "./dist/theme-provider.d.ts",
+      "import": "./dist/theme-provider.js",
+      "require": "./dist/theme-provider.cjs"
+    },
+    "./component-preview": {
+      "types": "./dist/component-preview.d.ts",
+      "import": "./dist/component-preview.js",
+      "require": "./dist/component-preview.cjs"
     },
     "./tailwind": {
       "types": "./dist/tailwind.d.ts",
@@ -24,6 +39,7 @@
   "scripts": {
     "build": "tsup --config tsup.config.ts"
   },
+  "sideEffects": false,
   "dependencies": {
     "class-variance-authority": "^0.7.1",
     "framer-motion": "^12.38.0",

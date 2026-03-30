@@ -16,7 +16,7 @@ export const maxDuration = 300;
 export const dynamic = "force-dynamic";
 
 const SETTLE_MS = 1200;
-const MAX_STEPS = 25;
+const DEFAULT_MAX_STEPS = 25;
 const MAX_PROMPT_LENGTH = 1000;
 
 function sanitize(label: string): string {
@@ -82,7 +82,8 @@ async function explorePreviewMode(
   projectKey: string,
   modeKey: string,
   zip: AdmZip,
-  userPrompt: string
+  userPrompt: string,
+  maxSteps: number
 ): Promise<number> {
   let step = 0;
   let staleSteps = 0;
@@ -98,7 +99,12 @@ async function explorePreviewMode(
   );
   step++;
 
-  while (step < MAX_STEPS) {
+  // When maxSteps is 0, only capture the initial frame — no AI exploration
+  if (maxSteps === 0) {
+    return step;
+  }
+
+  while (step < maxSteps) {
     // Take a screenshot of the frame for Gemini to analyse
     const screenshotBuffer = await frame.screenshot({ type: "png" });
     const base64Screenshot = Buffer.from(screenshotBuffer).toString("base64");
@@ -235,6 +241,11 @@ export async function GET(request: NextRequest) {
       .get("prompt")
       ?.trim()
       .slice(0, MAX_PROMPT_LENGTH) ?? "";
+  const maxStepsParam = request.nextUrl.searchParams.get("maxSteps");
+  const maxSteps =
+    maxStepsParam !== null
+      ? Math.max(0, Math.min(Number(maxStepsParam) || 0, DEFAULT_MAX_STEPS))
+      : DEFAULT_MAX_STEPS;
 
   if (!projectKey || !screenshotProjects[projectKey]) {
     return new Response(
@@ -285,7 +296,8 @@ export async function GET(request: NextRequest) {
           projectKey,
           vp.id,
           zip,
-          userPrompt
+          userPrompt,
+          maxSteps
         );
         console.log(
           `[AI Explorer] ${vp.id} exploration complete: ${totalSteps} steps`

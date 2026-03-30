@@ -1,4 +1,6 @@
 export { ThemeProvider, useTheme } from "../theme-provider";
+export type { ComponentPreviewProps } from "./component-preview";
+export { ComponentPreview } from "./component-preview";
 export type { HeaderProps } from "./header";
 export { Header } from "./header";
 export type {

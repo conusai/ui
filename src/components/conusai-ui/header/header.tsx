@@ -39,6 +39,14 @@ const Header = React.forwardRef<HTMLElement, HeaderProps>(
       onMenuClick,
       showMenuButton = true,
       languagePresentation = "auto",
+      languagePickerProps,
+      menuButtonAsChild = false,
+      menuButtonChild,
+      menuButtonLabel = "Open navigation",
+      themeToggleAsChild = false,
+      themeToggleChild,
+      themeToggleLabel = "Toggle theme",
+      avatar,
       surface = "default",
       className,
       ...props
@@ -46,6 +54,7 @@ const Header = React.forwardRef<HTMLElement, HeaderProps>(
     ref
   ) => {
     const { resolvedTheme, setTheme } = useTheme();
+    const nextTheme = resolvedTheme === "dark" ? "light" : "dark";
 
     return (
       <header
@@ -58,13 +67,14 @@ const Header = React.forwardRef<HTMLElement, HeaderProps>(
         <div className="flex min-w-0 items-center gap-3">
           {showMenuButton ? (
             <Button
+              asChild={menuButtonAsChild && Boolean(menuButtonChild)}
               variant="outline"
               size="icon-sm"
               className="touch-target border-border/70 bg-background/80"
               onClick={onMenuClick}
-              aria-label="Open navigation"
+              aria-label={menuButtonLabel}
             >
-              <Menu />
+              {menuButtonChild ?? <Menu />}
             </Button>
           ) : null}
           <div className="min-w-0">
@@ -82,29 +92,32 @@ const Header = React.forwardRef<HTMLElement, HeaderProps>(
             onChange={onLanguageChange}
             presentation={languagePresentation}
             triggerVariant="outline"
+            {...languagePickerProps}
           />
           <Button
+            asChild={themeToggleAsChild && Boolean(themeToggleChild)}
             variant="outline"
             size="icon-sm"
             className="touch-target border-border/70 bg-background/80"
-            onClick={() =>
-              setTheme(resolvedTheme === "dark" ? "light" : "dark")
-            }
-            aria-label="Toggle theme"
+            onClick={() => setTheme(nextTheme)}
+            aria-label={themeToggleLabel}
           >
-            {resolvedTheme === "dark" ? <SunMedium /> : <MoonStar />}
+            {themeToggleChild ??
+              (resolvedTheme === "dark" ? <SunMedium /> : <MoonStar />)}
           </Button>
-          <Avatar className="ring-1 ring-border/60">
-            <AvatarFallback className="bg-[linear-gradient(135deg,rgba(110,204,255,0.32),rgba(255,211,126,0.38))] text-foreground">
-              CA
-            </AvatarFallback>
-          </Avatar>
+          {avatar ?? (
+            <Avatar className="ring-1 ring-border/60">
+              <AvatarFallback className="bg-[linear-gradient(135deg,rgba(110,204,255,0.32),rgba(255,211,126,0.38))] text-foreground">
+                CA
+              </AvatarFallback>
+            </Avatar>
+          )}
         </div>
       </header>
     );
   }
 );
 
-Header.displayName = "Header";
+Header.displayName = "ConusHeader";
 
 export { Header };

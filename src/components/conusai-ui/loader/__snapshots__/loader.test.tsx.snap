@@ -1,0 +1,39 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Loader > matches snapshot 1`] = `
+<div
+  class="absolute inset-0 z-50 flex items-center justify-center bg-[radial-gradient(circle_at_top,rgba(110,204,255,0.24),transparent_34%),linear-gradient(180deg,rgba(9,17,31,0.96),rgba(12,24,44,0.92))]"
+  data-slot="conus-loader"
+  data-tone="default"
+  style="opacity: 0;"
+>
+  <div
+    class="flex flex-col items-center gap-4 text-center text-primary-foreground"
+  >
+    <div
+      class="relative flex size-20 items-center justify-center rounded-full border border-white/10 bg-white/6"
+    >
+      <div
+        class="absolute inset-2 rounded-full border border-[color:var(--conus-aurora)]/35"
+      />
+      <div
+        class="size-10 rounded-[1rem] bg-[linear-gradient(135deg,rgba(110,204,255,1),rgba(255,211,126,0.95))] shadow-[0_0_40px_rgba(110,204,255,0.35)]"
+      />
+    </div>
+    <div
+      class="space-y-1"
+    >
+      <p
+        class="font-heading text-lg uppercase tracking-[0.24em]"
+      >
+        ConusAI
+      </p>
+      <p
+        class="text-sm text-white/72"
+      >
+        Calibrating the mobile demo
+      </p>
+    </div>
+  </div>
+</div>
+`;
