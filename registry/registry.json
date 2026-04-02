@@ -1,0 +1,271 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "conusai-ui",
+  "homepage": "https://github.com/conusai/conusai-ui",
+  "items": [
+    {
+      "name": "header",
+      "type": "registry:ui",
+      "title": "Header",
+      "description": "Mobile-first app header with leading/trailing slots, glassmorphism, and safe-area support.",
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/conusai-ui/header/header.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/conusai-ui/header/header.types.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/conusai-ui/header/index.ts",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "language-picker",
+      "type": "registry:ui",
+      "title": "Language Picker",
+      "description": "Accessible language selector with Sheet (mobile) or DropdownMenu (desktop) presentation.",
+      "dependencies": ["class-variance-authority", "lucide-react"],
+      "registryDependencies": ["button", "dropdown-menu", "sheet"],
+      "files": [
+        {
+          "path": "components/conusai-ui/language-picker/language-picker.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/conusai-ui/language-picker/language-picker.types.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/conusai-ui/language-picker/index.ts",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "left-sidebar",
+      "type": "registry:ui",
+      "title": "Left Sidebar",
+      "description": "Animated navigation sidebar with overlay and inline variants.",
+      "dependencies": [
+        "class-variance-authority",
+        "framer-motion",
+        "lucide-react"
+      ],
+      "registryDependencies": ["button"],
+      "files": [
+        {
+          "path": "components/conusai-ui/left-sidebar/left-sidebar.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/conusai-ui/left-sidebar/left-sidebar.types.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/conusai-ui/left-sidebar/index.ts",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "loader",
+      "type": "registry:ui",
+      "title": "Loader",
+      "description": "Full-screen animated loader with gradient spinner and reduced-motion support.",
+      "dependencies": ["class-variance-authority", "framer-motion"],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/conusai-ui/loader/loader.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/conusai-ui/loader/loader.types.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/conusai-ui/loader/index.ts",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "mobile-footer",
+      "type": "registry:ui",
+      "title": "Mobile Footer",
+      "description": "Floating or flush bottom tab bar with tap animations and safe-area padding.",
+      "dependencies": [
+        "class-variance-authority",
+        "framer-motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/conusai-ui/mobile-footer/mobile-footer.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/conusai-ui/mobile-footer/mobile-footer.types.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/conusai-ui/mobile-footer/index.ts",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "mobile-preview-frame",
+      "type": "registry:ui",
+      "title": "Mobile Preview Frame",
+      "description": "Device frame wrapper with mobile, tablet, and desktop modes for component showcases.",
+      "dependencies": ["class-variance-authority"],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/conusai-ui/mobile-preview-frame/mobile-preview-frame.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/conusai-ui/mobile-preview-frame/mobile-preview-frame.types.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/conusai-ui/mobile-preview-frame/index.ts",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "right-sidebar",
+      "type": "registry:ui",
+      "title": "Right Sidebar",
+      "description": "Generic detail panel (overlay/inline) with animated enter/exit — bring your own content.",
+      "dependencies": [
+        "class-variance-authority",
+        "framer-motion",
+        "lucide-react"
+      ],
+      "registryDependencies": ["button"],
+      "files": [
+        {
+          "path": "components/conusai-ui/right-sidebar/right-sidebar.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/conusai-ui/right-sidebar/right-sidebar.types.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "components/conusai-ui/right-sidebar/index.ts",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "component-preview",
+      "type": "registry:ui",
+      "title": "Component Preview",
+      "description": "Bordered card container for component demonstrations.",
+      "dependencies": [],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/conusai-ui/component-preview.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "motion-variants",
+      "type": "registry:lib",
+      "title": "Motion Variants",
+      "description": "Pre-built Framer Motion variant factories with reduced-motion support.",
+      "dependencies": ["framer-motion"],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "lib/motion-variants.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "theme-provider",
+      "type": "registry:ui",
+      "title": "Theme Provider",
+      "description": "Zero-dependency light/dark/system theme context with class strategy and localStorage persistence.",
+      "dependencies": [],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "components/theme-provider.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "use-reduced-motion",
+      "type": "registry:hook",
+      "title": "useReducedMotionPreference",
+      "description": "React hook for prefers-reduced-motion media query.",
+      "dependencies": [],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "hooks/use-reduced-motion.ts",
+          "type": "registry:hook"
+        }
+      ]
+    },
+    {
+      "name": "use-mobile",
+      "type": "registry:hook",
+      "title": "useIsMobile",
+      "description": "Viewport-based mobile detection via matchMedia.",
+      "dependencies": [],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "hooks/use-mobile.ts",
+          "type": "registry:hook"
+        }
+      ]
+    },
+    {
+      "name": "use-minimum-delay",
+      "type": "registry:hook",
+      "title": "useMinimumDelay",
+      "description": "Ensures a loading state shows for a minimum duration.",
+      "dependencies": [],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "hooks/use-minimum-delay.ts",
+          "type": "registry:hook"
+        }
+      ]
+    },
+    {
+      "name": "use-vibrate",
+      "type": "registry:hook",
+      "title": "useVibrate",
+      "description": "Navigator.vibrate() wrapper for haptic feedback.",
+      "dependencies": [],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "hooks/use-vibrate.ts",
+          "type": "registry:hook"
+        }
+      ]
+    }
+  ]
+}

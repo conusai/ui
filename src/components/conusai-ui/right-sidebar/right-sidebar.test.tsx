@@ -7,16 +7,12 @@ describe("RightSidebar", () => {
       <RightSidebar
         open
         variant="inline"
-        todo={{
-          id: "todo-1",
-          title: "Ship package exports",
-          description: "Finish the package refactor",
-          priority: "High",
-        }}
+        eyebrow="Inspector"
+        title="Task detail"
         onClose={() => undefined}
-        onChange={() => undefined}
-        onDelete={() => undefined}
-      />
+      >
+        <p>Panel content</p>
+      </RightSidebar>
     );
 
     expect(container.firstChild).toMatchSnapshot();

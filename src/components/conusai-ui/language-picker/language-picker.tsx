@@ -17,7 +17,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 import type { LanguagePickerProps } from "./language-picker.types";
@@ -43,7 +42,7 @@ const LanguagePicker = React.forwardRef<HTMLButtonElement, LanguagePickerProps>(
       options,
       value,
       onChange,
-      presentation = "auto",
+      presentation = "dropdown",
       triggerVariant = "outline",
       ariaLabel = "Change language",
       asChild = false,
@@ -56,9 +55,7 @@ const LanguagePicker = React.forwardRef<HTMLButtonElement, LanguagePickerProps>(
   ) => {
     const selected =
       options.find((option) => option.value === value) ?? options[0];
-    const isMobile = useIsMobile();
-    const useSheet =
-      presentation === "sheet" || (presentation === "auto" && isMobile);
+    const useSheet = presentation === "sheet";
 
     const trigger = (
       <Button

@@ -9,37 +9,6 @@ exports[`Header > matches snapshot 1`] = `
   <div
     class="flex min-w-0 items-center gap-3"
   >
-    <button
-      aria-label="Open navigation"
-      class="group/button inline-flex shrink-0 items-center justify-center border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg touch-target border-border/70 bg-background/80"
-      data-size="icon-sm"
-      data-slot="button"
-      data-variant="outline"
-    >
-      <svg
-        aria-hidden="true"
-        class="lucide lucide-menu"
-        fill="none"
-        height="24"
-        stroke="currentColor"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        viewBox="0 0 24 24"
-        width="24"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M4 5h16"
-        />
-        <path
-          d="M4 12h16"
-        />
-        <path
-          d="M4 19h16"
-        />
-      </svg>
-    </button>
     <div
       class="min-w-0"
     >
@@ -54,91 +23,6 @@ exports[`Header > matches snapshot 1`] = `
         Operations
       </h1>
     </div>
-  </div>
-  <div
-    class="flex items-center gap-2"
-  >
-    <button
-      aria-expanded="false"
-      aria-haspopup="menu"
-      aria-label="Change language"
-      class="group/button inline-flex shrink-0 items-center justify-center border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg touch-target border-border/70 bg-background/80 backdrop-blur"
-      data-size="icon-sm"
-      data-slot="dropdown-menu-trigger"
-      data-state="closed"
-      data-variant="outline"
-      id="radix-_r_0_"
-      type="button"
-    >
-      <svg
-        aria-hidden="true"
-        class="lucide lucide-globe"
-        fill="none"
-        height="24"
-        stroke="currentColor"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        viewBox="0 0 24 24"
-        width="24"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <circle
-          cx="12"
-          cy="12"
-          r="10"
-        />
-        <path
-          d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"
-        />
-        <path
-          d="M2 12h20"
-        />
-      </svg>
-    </button>
-    <button
-      aria-label="Toggle theme"
-      class="group/button inline-flex shrink-0 items-center justify-center border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg touch-target border-border/70 bg-background/80"
-      data-size="icon-sm"
-      data-slot="button"
-      data-variant="outline"
-    >
-      <svg
-        aria-hidden="true"
-        class="lucide lucide-moon-star"
-        fill="none"
-        height="24"
-        stroke="currentColor"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        viewBox="0 0 24 24"
-        width="24"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M18 5h4"
-        />
-        <path
-          d="M20 3v4"
-        />
-        <path
-          d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"
-        />
-      </svg>
-    </button>
-    <span
-      class="group/avatar relative flex size-8 shrink-0 rounded-full select-none after:absolute after:inset-0 after:rounded-full after:border after:border-border after:mix-blend-darken data-[size=lg]:size-10 data-[size=sm]:size-6 dark:after:mix-blend-lighten ring-1 ring-border/60"
-      data-size="default"
-      data-slot="avatar"
-    >
-      <span
-        class="flex size-full items-center justify-center rounded-full bg-muted text-sm group-data-[size=sm]/avatar:text-xs bg-[linear-gradient(135deg,rgba(110,204,255,0.32),rgba(255,211,126,0.38))] text-foreground"
-        data-slot="avatar-fallback"
-      >
-        CA
-      </span>
-    </span>
   </div>
 </header>
 `;

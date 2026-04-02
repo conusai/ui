@@ -1,4 +1,12 @@
-export { ThemeProvider, useTheme } from "../theme-provider";
+export {
+  cnMotionProps,
+  createFadeUpVariants,
+  createLoaderVariants,
+  createPanelVariants,
+  createSidebarVariants,
+  createTapMotion,
+  createTapVariants,
+} from "@/lib/motion-variants";
 export type { ComponentPreviewProps } from "./component-preview";
 export { ComponentPreview } from "./component-preview";
 export type { HeaderProps } from "./header";
@@ -20,12 +28,5 @@ export type {
   PreviewMode,
 } from "./mobile-preview-frame";
 export { MobilePreviewFrame } from "./mobile-preview-frame";
-export {
-  createFadeUpVariants,
-  createLoaderVariants,
-  createPanelVariants,
-  createSidebarVariants,
-  createTapMotion,
-} from "./motion";
-export type { EditableTodo, RightSidebarProps } from "./right-sidebar";
+export type { RightSidebarProps } from "./right-sidebar";
 export { RightSidebar } from "./right-sidebar";

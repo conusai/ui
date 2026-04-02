@@ -1,13 +1,19 @@
 "use client";
 
+import { Menu, MoonStar, SunMedium, Trash2 } from "lucide-react";
+
 import {
   Header,
+  LanguagePicker,
   LeftSidebar,
   Loader,
   MobileFooter,
   MobilePreviewFrame,
   RightSidebar,
 } from "@/components/conusai-ui";
+import { useTheme } from "@/components/theme-provider";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -53,6 +59,8 @@ function tabTitle(tab: LogistixDemoController["activeTab"]) {
 }
 
 export function LogistixDemoWorkspace({ demo }: LogistixDemoWorkspaceProps) {
+  const { resolvedTheme, setTheme } = useTheme();
+  const nextTheme = resolvedTheme === "dark" ? "light" : "dark";
   const navItems = appNavItems.map((item) => {
     if (item.id === "upload") {
       return {
@@ -93,12 +101,44 @@ export function LogistixDemoWorkspace({ demo }: LogistixDemoWorkspaceProps) {
           <Header
             title={tabTitle(demo.activeTab)}
             subtitle="Logistix AI"
-            language={demo.language}
-            languages={languages}
-            onLanguageChange={demo.setLanguage}
-            onMenuClick={demo.toggleLeftSidebar}
-            showMenuButton={demo.isMobilePreview}
-            languagePresentation={demo.isMobilePreview ? "sheet" : "dropdown"}
+            leading={
+              demo.isMobilePreview ? (
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  className="touch-target border-border/70 bg-background/80"
+                  onClick={demo.toggleLeftSidebar}
+                  aria-label="Open navigation"
+                >
+                  <Menu />
+                </Button>
+              ) : undefined
+            }
+            trailing={
+              <>
+                <LanguagePicker
+                  options={languages}
+                  value={demo.language}
+                  onChange={demo.setLanguage}
+                  presentation={demo.isMobilePreview ? "sheet" : "dropdown"}
+                  triggerVariant="outline"
+                />
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  className="touch-target border-border/70 bg-background/80"
+                  onClick={() => setTheme(nextTheme)}
+                  aria-label="Toggle theme"
+                >
+                  {resolvedTheme === "dark" ? <SunMedium /> : <MoonStar />}
+                </Button>
+                <Avatar className="ring-1 ring-border/60">
+                  <AvatarFallback className="bg-[linear-gradient(135deg,rgba(110,204,255,0.32),rgba(255,211,126,0.38))] text-foreground">
+                    CA
+                  </AvatarFallback>
+                </Avatar>
+              </>
+            }
             surface="elevated"
           />
 
@@ -232,13 +272,10 @@ export function LogistixDemoWorkspace({ demo }: LogistixDemoWorkspaceProps) {
             <RightSidebar
               variant={demo.isDesktopPreview ? "inline" : "overlay"}
               open={demo.inspectorOpen && Boolean(demo.selectedInvoice)}
-              todo={null}
               onClose={demo.closeInspector}
-              onDelete={demo.removeSelectedInvoice}
-              panelEyebrow="Extraction review"
-              panelTitle="Invoice detail"
+              eyebrow="Extraction review"
+              title="Invoice detail"
               backLabel="Back"
-              showDeleteButton
               className={cn(
                 demo.isDesktopPreview
                   ? "w-[34rem] max-w-[34rem] bg-card/92 shadow-[-28px_0_90px_-46px_rgba(10,16,31,0.72)]"
@@ -247,10 +284,23 @@ export function LogistixDemoWorkspace({ demo }: LogistixDemoWorkspaceProps) {
               )}
             >
               {demo.selectedInvoice ? (
-                <ExtractionDetail
-                  invoice={demo.selectedInvoice}
-                  onChange={demo.updateSelectedInvoice}
-                />
+                <div className="flex min-h-0 flex-1 flex-col">
+                  <div className="mb-2 flex justify-end">
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={demo.removeSelectedInvoice}
+                      aria-label="Delete invoice"
+                      className="touch-target"
+                    >
+                      <Trash2 className="text-destructive" />
+                    </Button>
+                  </div>
+                  <ExtractionDetail
+                    invoice={demo.selectedInvoice}
+                    onChange={demo.updateSelectedInvoice}
+                  />
+                </div>
               ) : null}
             </RightSidebar>
           </div>

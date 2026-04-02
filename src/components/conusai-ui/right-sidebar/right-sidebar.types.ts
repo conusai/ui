@@ -1,31 +1,18 @@
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
-export type EditableTodo = {
-  id: string;
-  title: string;
-  description: string;
-  priority: "Low" | "Medium" | "High";
-};
-
 export type RightSidebarProps = Omit<
   ComponentPropsWithoutRef<"aside">,
-  "onChange" | "onDelete" | "children"
+  "children"
 > & {
   open: boolean;
-  todo?: EditableTodo | null;
   onClose: () => void;
-  onChange?: (patch: Partial<EditableTodo>) => void;
-  onDelete?: () => void;
   variant?: "overlay" | "inline";
-  panelEyebrow?: string;
-  panelTitle?: string;
+  /** Eyebrow label shown in the panel header (inline variant only). */
+  eyebrow?: string;
+  /** Title shown in the panel header (inline variant only). */
+  title?: string;
   backLabel?: string;
-  showDeleteButton?: boolean;
   backButtonAsChild?: boolean;
   backButtonChild?: ReactNode;
-  deleteButtonAsChild?: boolean;
-  deleteButtonChild?: ReactNode;
-  deleteButtonLabel?: string;
-  emptyState?: ReactNode;
   children?: ReactNode;
 };

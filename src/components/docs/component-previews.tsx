@@ -6,19 +6,25 @@ import {
   Home,
   Inbox,
   Languages,
+  Menu,
+  MoonStar,
   Settings,
   Sparkles,
+  SunMedium,
 } from "lucide-react";
 import { useState } from "react";
 import type { FooterTab, NavItem } from "@/components/conusai-ui";
 import {
   ComponentPreview,
   Header,
+  LanguagePicker,
   LeftSidebar,
   Loader,
   MobileFooter,
   MobilePreviewFrame,
 } from "@/components/conusai-ui";
+import { useTheme } from "@/components/theme-provider";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -44,16 +50,49 @@ const footerItems: FooterTab[] = [
 
 export function HeaderPreview() {
   const [language, setLanguage] = useState("en");
+  const { resolvedTheme, setTheme } = useTheme();
 
   return (
     <ComponentPreview>
       <Header
         title="ConusAI"
         subtitle="Operations Center"
-        language={language}
-        languages={languages}
-        onLanguageChange={setLanguage}
-        onMenuClick={() => undefined}
+        leading={
+          <Button
+            variant="outline"
+            size="icon-sm"
+            className="touch-target border-border/70 bg-background/80"
+            onClick={() => undefined}
+            aria-label="Open navigation"
+          >
+            <Menu />
+          </Button>
+        }
+        trailing={
+          <>
+            <LanguagePicker
+              options={languages}
+              value={language}
+              onChange={setLanguage}
+            />
+            <Button
+              variant="outline"
+              size="icon-sm"
+              className="touch-target border-border/70 bg-background/80"
+              onClick={() =>
+                setTheme(resolvedTheme === "dark" ? "light" : "dark")
+              }
+              aria-label="Toggle theme"
+            >
+              {resolvedTheme === "dark" ? <SunMedium /> : <MoonStar />}
+            </Button>
+            <Avatar className="ring-1 ring-border/60">
+              <AvatarFallback className="bg-[linear-gradient(135deg,rgba(110,204,255,0.32),rgba(255,211,126,0.38))] text-foreground">
+                CA
+              </AvatarFallback>
+            </Avatar>
+          </>
+        }
       />
     </ComponentPreview>
   );

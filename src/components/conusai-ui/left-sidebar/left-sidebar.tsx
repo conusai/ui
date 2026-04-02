@@ -5,15 +5,14 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { Slot } from "radix-ui";
 import * as React from "react";
-
+import { Button } from "@/components/ui/button";
+import { useReducedMotionPreference } from "@/hooks/use-reduced-motion";
 import {
   cnMotionProps,
   createFadeUpVariants,
   createSidebarVariants,
-  createTapMotion,
-} from "@/components/conusai-ui/motion";
-import { Button } from "@/components/ui/button";
-import { useReducedMotionPreference } from "@/hooks/use-reduced-motion";
+  createTapVariants,
+} from "@/lib/motion-variants";
 import { cn } from "@/lib/utils";
 
 import type { LeftSidebarProps, NavItem } from "./left-sidebar.types";
@@ -50,7 +49,7 @@ function SidebarContent({
     state: { active: boolean; index: number }
   ) => React.ReactNode;
   fadeUpVariants: ReturnType<typeof createFadeUpVariants>;
-  tapMotion: ReturnType<typeof createTapMotion>;
+  tapMotion: ReturnType<typeof createTapVariants>;
 }) {
   const navItemVariants = cva(
     "touch-target rounded-[1.35rem] border px-4 py-3 text-left transition-colors",
@@ -187,7 +186,7 @@ const LeftSidebar = React.forwardRef<HTMLElement, LeftSidebarProps>(
     const shouldReduceMotion = useReducedMotionPreference();
     const fadeUpVariants = createFadeUpVariants(shouldReduceMotion);
     const sidebarMotionVariants = createSidebarVariants(shouldReduceMotion);
-    const tapMotion = createTapMotion(shouldReduceMotion);
+    const tapMotion = createTapVariants(shouldReduceMotion);
 
     if (variant === "inline") {
       return (

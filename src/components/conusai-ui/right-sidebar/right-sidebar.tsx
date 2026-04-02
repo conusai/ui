@@ -2,169 +2,65 @@
 
 import { cva } from "class-variance-authority";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import * as React from "react";
-
-import { createPanelVariants } from "@/components/conusai-ui/motion";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion";
+import { createPanelVariants } from "@/lib/motion-variants";
 import { cn } from "@/lib/utils";
 
-import type { EditableTodo, RightSidebarProps } from "./right-sidebar.types";
+import type { RightSidebarProps } from "./right-sidebar.types";
 
 function SidebarPanel({
-  todo,
   onClose,
-  onChange,
-  onDelete,
-  panelEyebrow,
-  panelTitle,
+  eyebrow,
+  title,
   backLabel,
-  showDeleteButton,
   backButtonAsChild,
   backButtonChild,
-  deleteButtonAsChild,
-  deleteButtonChild,
-  deleteButtonLabel,
-  emptyState,
   children,
   inline,
 }: {
-  todo: EditableTodo | null;
   onClose: () => void;
-  onChange?: (patch: Partial<EditableTodo>) => void;
-  onDelete?: () => void;
-  panelEyebrow: string;
-  panelTitle: string;
+  eyebrow: string;
+  title: string;
   backLabel: string;
-  showDeleteButton: boolean;
   backButtonAsChild: boolean;
   backButtonChild?: React.ReactNode;
-  deleteButtonAsChild: boolean;
-  deleteButtonChild?: React.ReactNode;
-  deleteButtonLabel: string;
-  emptyState?: React.ReactNode;
   children?: React.ReactNode;
   inline: boolean;
 }) {
-  const priorityVariants = cva(
-    "touch-target rounded-2xl border px-3 py-2 text-sm font-medium",
-    {
-      variants: {
-        active: {
-          true: "border-primary bg-primary text-primary-foreground",
-          false: "border-border bg-background hover:bg-muted",
-        },
-      },
-    }
-  );
-
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <Button
-            asChild={backButtonAsChild && Boolean(backButtonChild)}
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="touch-target"
-            aria-label={backLabel}
-          >
-            {backButtonChild ?? (
-              <>
-                <ArrowLeft />
-                {backLabel}
-              </>
-            )}
-          </Button>
-          {inline ? (
-            <div>
-              <p className="font-heading text-xs uppercase tracking-[0.24em] text-muted-foreground">
-                {panelEyebrow}
-              </p>
-              <h2 className="mt-1 text-lg font-semibold">{panelTitle}</h2>
-            </div>
-          ) : null}
-        </div>
-        {showDeleteButton ? (
-          <Button
-            asChild={deleteButtonAsChild && Boolean(deleteButtonChild)}
-            variant="ghost"
-            size="icon-sm"
-            onClick={onDelete}
-            aria-label={deleteButtonLabel}
-            disabled={!todo && !onDelete}
-            className="touch-target"
-          >
-            {deleteButtonChild ?? <Trash2 className="text-destructive" />}
-          </Button>
+      <div className="flex items-center gap-3">
+        <Button
+          asChild={backButtonAsChild && Boolean(backButtonChild)}
+          variant="ghost"
+          size="sm"
+          onClick={onClose}
+          className="touch-target"
+          aria-label={backLabel}
+        >
+          {backButtonChild ?? (
+            <>
+              <ArrowLeft />
+              {backLabel}
+            </>
+          )}
+        </Button>
+        {inline ? (
+          <div>
+            <p className="font-heading text-xs uppercase tracking-[0.24em] text-muted-foreground">
+              {eyebrow}
+            </p>
+            <h2 className="mt-1 text-lg font-semibold">{title}</h2>
+          </div>
         ) : null}
       </div>
 
-      {children ? (
-        <div className="mt-5 flex min-h-0 flex-1 flex-col overflow-hidden">
-          {children}
-        </div>
-      ) : todo ? (
-        <>
-          <div className="mt-6 space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="task-title">Title</Label>
-              <Input
-                id="task-title"
-                value={todo.title}
-                onChange={(event) => onChange?.({ title: event.target.value })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="task-description">Description</Label>
-              <textarea
-                id="task-description"
-                value={todo.description}
-                onChange={(event) =>
-                  onChange?.({ description: event.target.value })
-                }
-                className="min-h-32 w-full rounded-[1.15rem] border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Priority</Label>
-              <div className="grid grid-cols-3 gap-2">
-                {(["Low", "Medium", "High"] as const).map((priority) => (
-                  <button
-                    key={priority}
-                    type="button"
-                    onClick={() => onChange?.({ priority })}
-                    className={cn(
-                      priorityVariants({ active: todo.priority === priority })
-                    )}
-                  >
-                    {priority}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-auto rounded-[1.4rem] border border-border/70 bg-background/80 p-4 text-sm text-muted-foreground">
-            Editing stays local to the demo. This panel exists to prove the
-            component library can handle focused, detail-heavy workflows across
-            device sizes.
-          </div>
-        </>
-      ) : (
-        (emptyState ?? (
-          <div className="my-auto rounded-[1.6rem] border border-dashed border-border/80 bg-background/70 p-5 text-sm text-muted-foreground">
-            Select a task to inspect how the detail panel adapts on larger
-            layouts.
-          </div>
-        ))
-      )}
+      <div className="mt-5 flex min-h-0 flex-1 flex-col overflow-hidden">
+        {children}
+      </div>
     </div>
   );
 }
@@ -186,32 +82,23 @@ const RightSidebar = React.forwardRef<HTMLElement, RightSidebarProps>(
   (
     {
       open,
-      todo = null,
       onClose,
-      onChange,
-      onDelete,
       variant = "overlay",
       className,
-      panelEyebrow = "Inspector",
-      panelTitle = "Task detail",
+      eyebrow = "Inspector",
+      title = "Detail",
       backLabel = "Back",
-      showDeleteButton = true,
       backButtonAsChild = false,
       backButtonChild,
-      deleteButtonAsChild = false,
-      deleteButtonChild,
-      deleteButtonLabel = "Delete task",
-      emptyState,
       children,
     },
     ref
   ) => {
     const shouldReduceMotion = useReducedMotionPreference();
     const panelVariants = createPanelVariants(shouldReduceMotion);
-    const hasContent = Boolean(todo || children);
 
     if (variant === "inline") {
-      if (!open || !hasContent) {
+      if (!open) {
         return null;
       }
 
@@ -228,20 +115,12 @@ const RightSidebar = React.forwardRef<HTMLElement, RightSidebarProps>(
             className={cn(rightSidebarVariants({ variant }), className)}
           >
             <SidebarPanel
-              todo={todo}
               onClose={onClose}
-              onChange={onChange}
-              onDelete={onDelete}
-              panelEyebrow={panelEyebrow}
-              panelTitle={panelTitle}
+              eyebrow={eyebrow}
+              title={title}
               backLabel={backLabel}
-              showDeleteButton={showDeleteButton}
               backButtonAsChild={backButtonAsChild}
               backButtonChild={backButtonChild}
-              deleteButtonAsChild={deleteButtonAsChild}
-              deleteButtonChild={deleteButtonChild}
-              deleteButtonLabel={deleteButtonLabel}
-              emptyState={emptyState}
               inline
             >
               {children}
@@ -253,11 +132,11 @@ const RightSidebar = React.forwardRef<HTMLElement, RightSidebarProps>(
 
     return (
       <AnimatePresence>
-        {open && hasContent ? (
+        {open ? (
           <>
             <motion.button
               type="button"
-              aria-label="Close task inspector"
+              aria-label="Close panel"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -275,20 +154,12 @@ const RightSidebar = React.forwardRef<HTMLElement, RightSidebarProps>(
               className={cn(rightSidebarVariants({ variant }), className)}
             >
               <SidebarPanel
-                todo={todo}
                 onClose={onClose}
-                onChange={onChange}
-                onDelete={onDelete}
-                panelEyebrow={panelEyebrow}
-                panelTitle={panelTitle}
+                eyebrow={eyebrow}
+                title={title}
                 backLabel={backLabel}
-                showDeleteButton={showDeleteButton}
                 backButtonAsChild={backButtonAsChild}
                 backButtonChild={backButtonChild}
-                deleteButtonAsChild={deleteButtonAsChild}
-                deleteButtonChild={deleteButtonChild}
-                deleteButtonLabel={deleteButtonLabel}
-                emptyState={emptyState}
                 inline={false}
               >
                 {children}

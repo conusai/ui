@@ -97,7 +97,7 @@ export function createLoaderVariants(shouldReduceMotion: boolean): Variants {
   };
 }
 
-export function createTapMotion(
+export function createTapVariants(
   shouldReduceMotion: boolean
 ): Pick<MotionProps, "whileHover" | "whileTap"> {
   if (shouldReduceMotion) {
@@ -109,6 +109,9 @@ export function createTapMotion(
     whileHover: { y: -1 },
   };
 }
+
+/** @deprecated Use createTapVariants instead */
+export const createTapMotion = createTapVariants;
 
 export function cnMotionProps<T extends MotionProps>(
   ...propsList: Array<Partial<T> | undefined>

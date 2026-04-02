@@ -3,9 +3,8 @@
 import { cva } from "class-variance-authority";
 import { AnimatePresence, motion } from "framer-motion";
 import * as React from "react";
-
-import { createLoaderVariants } from "@/components/conusai-ui/motion";
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion";
+import { createLoaderVariants } from "@/lib/motion-variants";
 import { cn } from "@/lib/utils";
 
 import type { LoaderProps } from "./loader.types";

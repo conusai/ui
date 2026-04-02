@@ -6,7 +6,7 @@ export type LanguageOption = {
   flag: string;
 };
 
-export type LanguagePickerPresentation = "auto" | "sheet" | "dropdown";
+export type LanguagePickerPresentation = "sheet" | "dropdown";
 
 export type LanguagePickerProps = Omit<
   ComponentPropsWithoutRef<"button">,

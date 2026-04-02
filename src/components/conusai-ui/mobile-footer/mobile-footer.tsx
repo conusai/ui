@@ -4,9 +4,8 @@ import { cva } from "class-variance-authority";
 import { motion } from "framer-motion";
 import { Slot } from "radix-ui";
 import * as React from "react";
-
-import { cnMotionProps, createTapMotion } from "@/components/conusai-ui/motion";
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion";
+import { cnMotionProps, createTapVariants } from "@/lib/motion-variants";
 import { cn } from "@/lib/utils";
 
 import type { MobileFooterProps } from "./mobile-footer.types";
@@ -40,7 +39,7 @@ const MobileFooter = React.forwardRef<HTMLElement, MobileFooterProps>(
     ref
   ) => {
     const shouldReduceMotion = useReducedMotionPreference();
-    const tapMotion = cnMotionProps(createTapMotion(shouldReduceMotion));
+    const tapMotion = cnMotionProps(createTapVariants(shouldReduceMotion));
 
     return (
       <nav

@@ -8,11 +8,10 @@ import {
   Plus,
   Search,
 } from "lucide-react";
-
-import { createFadeUpVariants, createTapMotion } from "@/components/conusai-ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useReducedMotionPreference } from "@/hooks/use-reduced-motion";
+import { createFadeUpVariants, createTapVariants } from "@/lib/motion-variants";
 import { cn } from "@/lib/utils";
 
 import { filterItems } from "./todo-demo.constants";
@@ -37,7 +36,7 @@ function priorityTone(priority: Todo["priority"]) {
 export function TodoTaskList({ demo }: TodoTaskListProps) {
   const shouldReduceMotion = useReducedMotionPreference();
   const fadeUpVariants = createFadeUpVariants(shouldReduceMotion);
-  const tapMotion = createTapMotion(shouldReduceMotion);
+  const tapMotion = createTapVariants(shouldReduceMotion);
 
   return (
     <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-4 md:px-5">

@@ -2,7 +2,7 @@ import AdmZip from "adm-zip";
 import type { NextRequest } from "next/server";
 import type { Browser, Locator, Page } from "playwright";
 import { chromium } from "playwright";
-
+import { VIEWPORTS } from "@/app/api/export/types";
 import { explorerModel } from "@/lib/gemini-client";
 import type { GeminiExplorerResponse } from "@/tools/screenshot-generator";
 import {
@@ -10,7 +10,6 @@ import {
   type ProjectKey,
   screenshotProjects,
 } from "@/tools/screenshot-generator";
-import { VIEWPORTS } from "@/app/api/export/types";
 
 export const maxDuration = 300;
 export const dynamic = "force-dynamic";

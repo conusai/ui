@@ -1,1 +1,1 @@
-export * from "../../../src/components/conusai-ui/motion";
+export * from "../../../src/lib/motion-variants";
