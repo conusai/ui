@@ -4,34 +4,37 @@ Mobile-first, copy-paste component library built on **Next.js 16**, **React 19**
 
 > Components are files, not packages. Install them into your project with a single command.
 
-## Install Components (shadcn-style CLI)
+## Quick Start
 
 ```bash
-# Add a single component
-bunx conusai-add header
-
-# Add multiple components (dependencies auto-resolved)
-bunx conusai-add header language-picker mobile-footer
-
-# Install everything
-bunx conusai-add --all
-
-# List all available components
-bunx conusai-add --list
-
-# Specify target directory
-bunx conusai-add header --dir src/components
-
-# Preview without writing files
-bunx conusai-add header --dry-run
+bun run https://raw.githubusercontent.com/conusai/conusai-ui/main/scripts/conusai-add.ts header
 ```
 
-The CLI fetches components directly from this GitHub repository and writes them into your project. Once installed, the files are **yours** — no runtime dependency on `conusai-ui`.
+No install required — runs the CLI directly from GitHub. Once installed, files are **yours**.
 
-### Install from a fork or branch
+## CLI Reference
 
 ```bash
-bunx conusai-add header --repo your-org/conusai-ui --branch develop
+# List all available components
+bun run https://raw.githubusercontent.com/conusai/conusai-ui/main/scripts/conusai-add.ts --list
+
+# Add a single component
+bun run https://raw.githubusercontent.com/conusai/conusai-ui/main/scripts/conusai-add.ts header
+
+# Add multiple (dependencies auto-resolved)
+bun run https://raw.githubusercontent.com/conusai/conusai-ui/main/scripts/conusai-add.ts header language-picker mobile-footer
+
+# Install everything
+bun run https://raw.githubusercontent.com/conusai/conusai-ui/main/scripts/conusai-add.ts --all
+
+# Custom target directory (default: src)
+bun run https://raw.githubusercontent.com/conusai/conusai-ui/main/scripts/conusai-add.ts header --dir src/components
+
+# Preview without writing files
+bun run https://raw.githubusercontent.com/conusai/conusai-ui/main/scripts/conusai-add.ts header --dry-run
+
+# Install from a fork or branch
+bun run https://raw.githubusercontent.com/conusai/conusai-ui/main/scripts/conusai-add.ts header --repo your-org/conusai-ui --branch develop
 ```
 
 ## Available Components
